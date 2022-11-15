@@ -8,4 +8,23 @@
 #include <gtest/gtest.h>
 #include "../Manager.h"
 
+class TestFixture : public ::testing::Test {
+protected:
+    TestFixture() {
+
+    }
+
+    ClassProject::Manager manager;
+};
+
+TEST(BDDTests, ExampleTest)
+{
+    EXPECT_EQ(1, 1);
+}
+
+TEST_F(TestFixture, ExampleTestFixture)
+{
+    
+}
+
 #endif
