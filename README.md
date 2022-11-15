@@ -29,13 +29,13 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/TUK-EIS/VDSProject">
+  <a href="https://github.com/CT-7567/VDSProject-Group3">
     <img src="doc/figures/TUKL_LOGO_4C.png" alt="Logo" width="400" height="200">
   </a>
   <h3 align="center">
   VDS Class Project
   <br />
-  Group #X
+  Group #3
   <br />
   Winter Semester 2022/2023
   </h3>
@@ -44,7 +44,7 @@
     GitHub repository for Verification of Digital Systems Class Project
     <br />
     <br />
-    <a href="https://github.com/TUK-EIS/VDSProject/issues">Report Bug</a>
+    <a href="https://github.com/CT-7567/VDSProject-Group3/issues">Report Bug</a>
   </p>
 </div>
 
@@ -258,14 +258,14 @@ You might find helpful links below.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/TUK-EIS/VDSProject.svg?style=for-the-badge
-[contributors-url]: https://github.com/TUK-EIS/VDSProject/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/TUK-EIS/VDSProject.svg?style=for-the-badge
-[forks-url]: https://github.com/TUK-EIS/VDSProject/network/members
-[stars-shield]: https://img.shields.io/github/stars/TUK-EIS/VDSProject.svg?style=for-the-badge
-[stars-url]: https://github.com/TUK-EIS/VDSProject/stargazers
-[issues-shield]: https://img.shields.io/github/issues/TUK-EIS/VDSProject.svg?style=for-the-badge
-[issues-url]: https://github.com/TUK-EIS/VDSProject/issues
+[contributors-shield]: https://img.shields.io/github/contributors/CT-7567/VDSProject-Group3.svg?style=for-the-badge
+[contributors-url]: https://github.com/CT-7567/VDSProject-Group3/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/CT-7567/VDSProject-Group3.svg?style=for-the-badge
+[forks-url]: https://github.com/CT-7567/VDSProject-Group3/network/members
+[stars-shield]: https://img.shields.io/github/stars/CT-7567/VDSProject-Group3.svg?style=for-the-badge
+[stars-url]: https://github.com/CT-7567/VDSProject-Group3/stargazers
+[issues-shield]: https://img.shields.io/github/issues/CT-7567/VDSProject-Group3.svg?style=for-the-badge
+[issues-url]: https://github.com/CT-7567/VDSProject-Group3/issues
 <!--
 [license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
 [license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
