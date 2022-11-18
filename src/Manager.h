@@ -22,8 +22,7 @@ class Manager:public ManagerInterface{
         BDD_ID Low;
         BDD_ID TopVar;
         std::string Label;
-
-     };
+    };
 
 
     std::unordered_map <BDD_ID, Node> Tabel;
@@ -77,14 +76,8 @@ class Manager:public ManagerInterface{
     virtual void findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root);
 
     virtual size_t uniqueTableSize();
-
-
-
-
-
 };
 
-
-}
+} // namespace ClassProject
 
 #endif
