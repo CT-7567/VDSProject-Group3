@@ -14,10 +14,20 @@ protected:
 
     }
 
-    ClassProject::Manager manager;
+    //ClassProject::M anager manager;
 };
 
+TEST(createVarTest, IDTeset)
+{
+    ClassProject::Manager table = ClassProject::Manager();
+    const std::string test =  "a";
+    ClassProject::BDD_ID test_ID = table.createVar(test);
+    EXPECT_EQ(test_ID, 2);
+    const std::string test2 = "b";
+    ClassProject::BDD_ID test_ID2 = table.createVar(test2);
+    EXPECT_EQ(test_ID2, 3);
 
+}
 
 
 TEST(BDDTests, ExampleTest)
