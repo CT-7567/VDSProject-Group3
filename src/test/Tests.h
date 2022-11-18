@@ -30,7 +30,7 @@ TEST(BDDTests, ExampleTest)
 
 TEST_F(TestFixture, ExampleTestFixture)
 {
-    
+
 }
 
 #endif
