@@ -13,6 +13,8 @@ namespace ClassProject {
 
 class Manager:public ManagerInterface{
 
+    static constexpr BDD_ID FALSE_ID = 0;
+    static constexpr BDD_ID TRUE_ID = 1;
 
     public:
 

@@ -15,6 +15,7 @@ const BDD_ID &Manager::True()
 
 const BDD_ID &Manager::False()
 {
+    return FALSE_ID;
 }
 
 bool Manager::isConstant(BDD_ID f)
