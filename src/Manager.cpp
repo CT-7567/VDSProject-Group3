@@ -19,6 +19,10 @@ const BDD_ID &Manager::False()
 
 bool Manager::isConstant(BDD_ID f)
 {
+    if(f == 0 or f == 1){
+        return true;
+    }
+    return false;
 }
 
 bool Manager::isVariable(BDD_ID x)
