@@ -29,6 +29,25 @@ TEST(createVarTest, IDTeset)
 
 }
 
+TEST(isConstantTest, leafTest)
+{
+    ClassProject::Manager table = ClassProject::Manager();
+    bool test1 = table.isConstant(0);
+    bool test2 = table.isConstant(1);
+    EXPECT_EQ(test2, true);
+    EXPECT_EQ(test1, true);
+    for(int i = 2; i < 10; i++){
+        EXPECT_EQ(table.isConstant(i), false);
+    }
+}
+TEST(isConstantTest, noLeafTest)
+{
+    ClassProject::Manager table = ClassProject::Manager();
+    ClassProject::BDD_ID id = table.createVar("a");
+    bool test1 = table.isConstant(id);
+    EXPECT_EQ(test1, false);
+
+}
 
 TEST(BDDTests, ExampleTest)
 {
