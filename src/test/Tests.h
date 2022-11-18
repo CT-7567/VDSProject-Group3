@@ -8,13 +8,13 @@
 #include <gtest/gtest.h>
 #include "../Manager.h"
 
-class TestFixture : public ::testing::Test {
+class ManagerFixture : public ::testing::Test {
 protected:
-    TestFixture() {
-
+    ManagerFixture() {
+        
     }
 
-    //ClassProject::M anager manager;
+    ClassProject::Manager manager;
 };
 
 TEST(createVarTest, IDTeset)
@@ -49,17 +49,15 @@ TEST(isConstantTest, noLeafTest)
 
 }
 
-TEST(BDDTests, ExampleTest)
+TEST_F(ManagerFixture, FalseTest)
 {
-    EXPECT_EQ(1, 1);
-}
+    auto false_id = manager.False();
+    EXPECT_EQ(false_id, 0);
 
-
-
-
-TEST_F(TestFixture, ExampleTestFixture)
-{
-
+    auto false_node = manager.Tabel.at(false_id);
+    EXPECT_EQ(false_node.High, 0);
+    EXPECT_EQ(false_node.Low, 0);
+    EXPECT_EQ(false_node.TopVar, 0);
 }
 
 #endif
