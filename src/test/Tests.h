@@ -17,10 +17,16 @@ protected:
     ClassProject::Manager manager;
 };
 
+
+
+
 TEST(BDDTests, ExampleTest)
 {
     EXPECT_EQ(1, 1);
 }
+
+
+
 
 TEST_F(TestFixture, ExampleTestFixture)
 {

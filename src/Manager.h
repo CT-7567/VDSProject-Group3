@@ -7,15 +7,17 @@
 
 #include "ManagerInterface.h"
 #include <vector>
+#include <unordered_map>
 
 namespace ClassProject {
 
 class Manager:public ManagerInterface{
 
 
+    public:
+
     struct Node { 
 
-        BDD_ID ID;
         BDD_ID High;
         BDD_ID Low;
         BDD_ID TopVar;
@@ -24,9 +26,13 @@ class Manager:public ManagerInterface{
      };
 
 
+    std::unordered_map <BDD_ID, Node> Tabel;
 
-    std::vector <Node> Tabel;
+    Manager(){
+        Tabel.insert( { 0, Node{ 0, 0, 0, "False" } } );
 
+        Tabel.insert( { 1, Node{ 1, 1, 1, "True" } } );
+    }
 
     virtual BDD_ID createVar(const std::string &label);
 
