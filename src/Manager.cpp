@@ -4,6 +4,9 @@ namespace ClassProject {
 
 BDD_ID Manager::createVar(const std::string &label)
 {
+    BDD_ID newID = Tabel.size();
+    Tabel.insert( { newID, Node{ 1, 0, newID, label } } );
+    return newID;
 }
 
 const BDD_ID &Manager::True()
