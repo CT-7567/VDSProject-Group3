@@ -107,6 +107,12 @@ TEST_F(ManagerFixture, CoFactorFalseTest)
     EXPECT_EQ(manager.coFactorFalse(a_or_b), var_b);
     EXPECT_EQ(manager.coFactorFalse(a_or_b, var_b), var_a);
     EXPECT_EQ(manager.coFactorFalse(a_or_b, var_c), a_or_b);
+
+    // Test terminal cases
+    EXPECT_EQ(manager.coFactorFalse(function, manager.False()), function);
+    EXPECT_EQ(manager.coFactorFalse(var_b, function), function);
+    EXPECT_EQ(manager.coFactorFalse(manager.False(), var_a), manager.False());
+    EXPECT_EQ(manager.coFactorFalse(manager.True(), var_a), manager.True());
 }
 
 #endif
