@@ -66,6 +66,7 @@ BDD_ID Manager::coFactorTrue(BDD_ID f)
 
 BDD_ID Manager::coFactorFalse(BDD_ID f)
 {
+    coFactorFalse(f, topVar(f));
 }
 
 BDD_ID Manager::neg(BDD_ID a)
