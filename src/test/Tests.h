@@ -11,13 +11,25 @@
 class ManagerFixture : public ::testing::Test {
 protected:
     ManagerFixture() {
-        manager.createVar("a");
-        manager.createVar("b");
-        manager.createVar("c");
-        manager.createVar("d");
+        // Build up the example from the document:
+        var_a = manager.createVar("a");
+        var_b = manager.createVar("b");
+        var_c = manager.createVar("c");
+        var_d = manager.createVar("d");
+
+        auto a_or_b = manager.or2(var_a, var_b);
+        auto c_and_d = manager.and2(var_c, var_d);
+
+        function = manager.and2(a_or_b, c_and_d);
     }
 
     ClassProject::Manager manager;
+
+    ClassProject::BDD_ID var_a;
+    ClassProject::BDD_ID var_b;
+    ClassProject::BDD_ID var_c;
+    ClassProject::BDD_ID var_d;
+    ClassProject::BDD_ID function;
 };
 
 TEST(createVarTest, IDTeset)
@@ -68,6 +80,33 @@ TEST_F(ManagerFixture, TopVarTest)
     for (auto const &[node_id, node] : manager.Tabel) {
         EXPECT_EQ(manager.topVar(node_id), node.TopVar);
     }
+}
+
+TEST_F(ManagerFixture, CoFactorFalseTest)
+{
+    EXPECT_EQ(manager.coFactorFalse(function), var_b);
+    EXPECT_EQ(manager.coFactorFalse(function, var_a), var_b);
+
+    auto a_and_c = manager.and2(var_a, var_c);
+    auto a_and_c_and_d = manager.and2(a_and_c, var_d);
+    EXPECT_EQ(manager.coFactorFalse(function, var_b), a_and_c_and_d);
+
+    EXPECT_EQ(manager.coFactorFalse(function, var_c), manager.False());
+    EXPECT_EQ(manager.coFactorFalse(function, var_d), manager.False());
+
+    EXPECT_EQ(manager.coFactorFalse(var_a), manager.False());
+    EXPECT_EQ(manager.coFactorFalse(var_b), manager.False());
+
+    EXPECT_EQ(manager.coFactorFalse(var_a, var_b), var_a);
+    EXPECT_EQ(manager.coFactorFalse(var_b, var_a), var_b);
+
+    EXPECT_EQ(manager.coFactorFalse(a_and_c), manager.False());
+    EXPECT_EQ(manager.coFactorFalse(a_and_c, var_b), a_and_c);
+
+    auto a_or_b = manager.or2(var_a, var_b);
+    EXPECT_EQ(manager.coFactorFalse(a_or_b), var_b);
+    EXPECT_EQ(manager.coFactorFalse(a_or_b, var_b), var_a);
+    EXPECT_EQ(manager.coFactorFalse(a_or_b, var_c), a_or_b);
 }
 
 #endif
