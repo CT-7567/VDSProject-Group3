@@ -45,6 +45,19 @@ BDD_ID Manager::coFactorTrue(BDD_ID f, BDD_ID x)
 
 BDD_ID Manager::coFactorFalse(BDD_ID f, BDD_ID x)
 {
+    // Terminal cases
+    if (isConstant(f) || isConstant(x) || topVar(f) > x) {
+        return f;
+    }
+
+    if (topVar(f) == x) {
+        return Tabel.at(f).Low;
+    }
+
+    auto true_case = coFactorFalse(Tabel.at(f).High, x);
+    auto false_case = coFactorFalse(Tabel.at(f).Low, x);
+
+    return ite(topVar(f), true_case, false_case);
 }
 
 BDD_ID Manager::coFactorTrue(BDD_ID f)
