@@ -11,7 +11,10 @@
 class ManagerFixture : public ::testing::Test {
 protected:
     ManagerFixture() {
-        
+        manager.createVar("a");
+        manager.createVar("b");
+        manager.createVar("c");
+        manager.createVar("d");
     }
 
     ClassProject::Manager manager;
@@ -58,6 +61,13 @@ TEST_F(ManagerFixture, FalseTest)
     EXPECT_EQ(false_node.High, 0);
     EXPECT_EQ(false_node.Low, 0);
     EXPECT_EQ(false_node.TopVar, 0);
+}
+
+TEST_F(ManagerFixture, TopVarTest)
+{
+    for (auto const &[node_id, node] : manager.Tabel) {
+        EXPECT_EQ(manager.topVar(node_id), node.TopVar);
+    }
 }
 
 #endif
