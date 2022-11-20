@@ -118,12 +118,12 @@ TEST_F(ManagerFixture, CoFactorFalseTest)
 TEST_F(ManagerFixture, TrueTest)
 {
     auto true_id = manager.True();
-    EXPECT_EQ(true_id, 0);
+    EXPECT_EQ(true_id, 1);
 
     auto true_node = manager.Tabel.at(true_id);
-    EXPECT_EQ(true_node.High, 0);
-    EXPECT_EQ(true_node.Low, 0);
-    EXPECT_EQ(true_node.TopVar, 0);
+    EXPECT_EQ(true_node.High, 1);
+    EXPECT_EQ(true_node.Low, 1);
+    EXPECT_EQ(true_node.TopVar, 1);
 }
 
 
@@ -138,7 +138,8 @@ TEST_F(ManagerFixture, isVarTest)
     EXPECT_EQ(isVarVariable, true);
 
     //Function test
-    auto isVarFunction = manager.isVariable( function );
+    auto a_or_b = manager.or2(var_a, var_b);
+    auto isVarFunction = manager.isVariable( a_or_b );
     EXPECT_EQ(isVarFunction, false);
 
 }

@@ -11,6 +11,7 @@ BDD_ID Manager::createVar(const std::string &label)
 
 const BDD_ID &Manager::True()
 {
+    return TRUE_ID;
 }
 
 const BDD_ID &Manager::False()
@@ -28,6 +29,10 @@ bool Manager::isConstant(BDD_ID f)
 
 bool Manager::isVariable(BDD_ID x)
 {
+    if( x == Tabel.at(x).TopVar && x != 0 && x != 1 ){
+        return true;
+    }
+    return false;
 }
 
 BDD_ID Manager::topVar(BDD_ID f)
