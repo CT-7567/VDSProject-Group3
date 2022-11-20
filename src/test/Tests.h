@@ -115,4 +115,42 @@ TEST_F(ManagerFixture, CoFactorFalseTest)
     EXPECT_EQ(manager.coFactorFalse(manager.True(), var_a), manager.True());
 }
 
+TEST_F(ManagerFixture, TrueTest)
+{
+    auto true_id = manager.True();
+    EXPECT_EQ(true_id, 0);
+
+    auto true_node = manager.Tabel.at(true_id);
+    EXPECT_EQ(true_node.High, 0);
+    EXPECT_EQ(true_node.Low, 0);
+    EXPECT_EQ(true_node.TopVar, 0);
+}
+
+
+TEST_F(ManagerFixture, isVarTest)
+{
+    //Note Leaf test
+    auto isVarLeaf = manager.isVariable( manager.True() );
+    EXPECT_EQ(isVarLeaf, false);
+
+    //Variable test
+    auto isVarVariable = manager.isVariable( var_b );
+    EXPECT_EQ(isVarVariable, true);
+
+    //Function test
+    auto isVarFunction = manager.isVariable( function );
+    EXPECT_EQ(isVarFunction, false);
+
+}
+
+
+
+
+
+
+
+
+
+
+
 #endif
