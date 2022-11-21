@@ -80,6 +80,18 @@ TEST_F(ManagerFixture, TopVarTest)
     for (auto const &[node_id, node] : manager.Tabel) {
         EXPECT_EQ(manager.topVar(node_id), node.TopVar);
     }
+
+    EXPECT_EQ(manager.topVar(var_a), var_a);
+    EXPECT_EQ(manager.topVar(var_b), var_b);
+    EXPECT_EQ(manager.topVar(var_c), var_c);
+    EXPECT_EQ(manager.topVar(var_d), var_d);
+
+    EXPECT_EQ(manager.topVar(function), var_a);
+
+    auto a_or_b = manager.or2(var_a, var_b);
+    auto c_and_d = manager.and2(var_c, var_d);
+    EXPECT_EQ(manager.topVar(a_or_b), var_a);
+    EXPECT_EQ(manager.topVar(c_and_d), var_c);
 }
 
 TEST_F(ManagerFixture, CoFactorFalseTest)
@@ -144,7 +156,20 @@ TEST_F(ManagerFixture, isVarTest)
 
 }
 
+TEST_F(ManagerFixture, TopVarNameTest)
+{
+    EXPECT_EQ(manager.getTopVarName(var_a), "a");
+    EXPECT_EQ(manager.getTopVarName(var_b), "b");
+    EXPECT_EQ(manager.getTopVarName(var_c), "c");
+    EXPECT_EQ(manager.getTopVarName(var_d), "d");
 
+    EXPECT_EQ(manager.getTopVarName(function), "a");
+    
+    auto a_or_b = manager.or2(var_a, var_b);
+    auto c_and_d = manager.and2(var_c, var_d);
+    EXPECT_EQ(manager.getTopVarName(a_or_b), "a");
+    EXPECT_EQ(manager.getTopVarName(c_and_d), "c");
+}
 
 
 
