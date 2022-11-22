@@ -171,7 +171,29 @@ TEST_F(ManagerFixture, TopVarNameTest)
     EXPECT_EQ(manager.getTopVarName(c_and_d), "c");
 }
 
+TEST_F(ManagerFixture, OrTest)
+{ 
+    auto a_or_b = manager.or2(var_a, var_b);
+    auto A_or_B = manager.Tabel.at(a_or_b);
 
+    EXPECT_EQ( A_or_B.Label , "(a + b)");
+    EXPECT_EQ( A_or_B.High, 1);
+    EXPECT_EQ( A_or_B.Low, 3);
+    EXPECT_EQ( A_or_B.TopVar, 2);
+
+}
+
+TEST_F(ManagerFixture, AndTest)
+{ 
+    auto a_or_b = manager.and2(var_a, var_b);
+    auto A_or_B = manager.Tabel.at(a_or_b);
+
+    EXPECT_EQ( A_or_B.Label , "(a * b)");
+    EXPECT_EQ( A_or_B.High, 3);
+    EXPECT_EQ( A_or_B.Low, 0);
+    EXPECT_EQ( A_or_B.TopVar, 2);
+
+}
 
 
 

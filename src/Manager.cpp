@@ -29,7 +29,7 @@ bool Manager::isConstant(BDD_ID f)
 
 bool Manager::isVariable(BDD_ID x)
 {
-    if( x == Tabel.at(x).TopVar && x != 0 && x != 1 ){
+    if( Tabel.at(x).Label.size() == 1 ){
         return true;
     }
     return false;
