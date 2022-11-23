@@ -47,6 +47,19 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
 
 BDD_ID Manager::coFactorTrue(BDD_ID f, BDD_ID x)
 {
+        // Terminal cases
+    if (isConstant(f) || isConstant(x) || topVar(f) > x) {
+        return f;
+    }
+
+    if (topVar(f) == x) {
+        return Tabel.at(f).High;
+    }
+
+    auto true_case = coFactorFalse(Tabel.at(f).High, x);
+    auto false_case = coFactorFalse(Tabel.at(f).Low, x);
+
+    return ite(topVar(f), true_case, false_case);
 }
 
 BDD_ID Manager::coFactorFalse(BDD_ID f, BDD_ID x)
@@ -68,25 +81,42 @@ BDD_ID Manager::coFactorFalse(BDD_ID f, BDD_ID x)
 
 BDD_ID Manager::coFactorTrue(BDD_ID f)
 {
+    return coFactorTrue(f, topVar(f));
 }
 
 BDD_ID Manager::coFactorFalse(BDD_ID f)
 {
-    coFactorFalse(f, topVar(f));
+    return coFactorFalse(f, topVar(f));
 }
 
 BDD_ID Manager::neg(BDD_ID a)
 {
+    return 0;
 }
 
 BDD_ID Manager::and2(BDD_ID a, BDD_ID b)
 {
-    return 0;
+    auto a_and_b = createVar(( "("+Tabel.at(a).Label+" * "+Tabel.at(b).Label+")" ));
+
+    Tabel.at(a_and_b).TopVar = ite( a, FALSE_ID, b );
+
+    Tabel.at(a_and_b).High = ite( coFactorTrue(a, a), coFactorTrue(FALSE_ID, a), coFactorTrue(b, a) );
+    Tabel.at(a_and_b).Low = ite( coFactorFalse(a, a), coFactorFalse(FALSE_ID, a), coFactorFalse(b, a) );
+
+    return a_and_b;
 }
 
 BDD_ID Manager::or2(BDD_ID a, BDD_ID b)
 {
-    return 0;
+    auto a_or_b = createVar(( "("+Tabel.at(a).Label+" + "+Tabel.at(b).Label+")" ));
+
+    Tabel.at(a_or_b).TopVar = ite( a, 1, b );
+
+    Tabel.at(a_or_b).High = ite( coFactorTrue(a, a), coFactorTrue(TRUE_ID, a), coFactorTrue(b, a) );
+    Tabel.at(a_or_b).Low = ite( coFactorFalse(a, a), coFactorFalse(TRUE_ID, a), coFactorFalse(b, a) );
+
+    return a_or_b;
+
 }
 
 BDD_ID Manager::xor2(BDD_ID a, BDD_ID b)
