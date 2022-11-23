@@ -176,6 +176,11 @@ TEST_F(ManagerFixture, OrTest)
     auto a_or_b = manager.or2(var_a, var_b);
     auto A_or_B = manager.Tabel.at(a_or_b);
 
+    std::cout << "Label: " << A_or_B.Label << std::endl;
+    std::cout << "High: " << A_or_B.High << std::endl;
+    std::cout << "Low: " << A_or_B.Low << std::endl;
+    std::cout << "TopVa: " << A_or_B.TopVar << std::endl;
+
     EXPECT_EQ( A_or_B.Label , "(a + b)");
     EXPECT_EQ( A_or_B.High, 1);
     EXPECT_EQ( A_or_B.Low, 3);
@@ -194,6 +199,46 @@ TEST_F(ManagerFixture, AndTest)
     EXPECT_EQ( A_or_B.TopVar, 2);
 
 }
+
+TEST_F(ManagerFixture, CoFacTrueTest)
+{ 
+
+    EXPECT_EQ( manager.coFactorTrue(var_a, var_a), 1);
+    EXPECT_EQ( manager.coFactorTrue(var_a), 1);
+    EXPECT_EQ( manager.coFactorTrue( 1, var_a), 1);
+    EXPECT_EQ( manager.coFactorTrue(var_b, var_a), var_b);
+
+    EXPECT_EQ( manager.coFactorTrue(var_c, var_c), 1);
+    EXPECT_EQ( manager.coFactorTrue(var_c), 1);
+    EXPECT_EQ( manager.coFactorTrue(var_d, var_c), var_d);
+    EXPECT_EQ( manager.coFactorTrue( 0, var_c), 0);
+
+    auto a_or_b = manager.or2(var_a, var_b);
+    EXPECT_EQ(manager.coFactorTrue(a_or_b), var_a);
+    EXPECT_EQ(manager.coFactorTrue(a_or_b, var_b), var_b);
+    EXPECT_EQ(manager.coFactorTrue(a_or_b, var_c), var_c);
+
+
+
+    auto a_and_b = manager.and2(var_a, var_b);
+
+    EXPECT_EQ(manager.coFactorFalse(a_and_b), manager.True() );
+    EXPECT_EQ(manager.coFactorFalse(a_and_b, var_b), var_a);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
