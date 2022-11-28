@@ -64,6 +64,32 @@ TEST(isConstantTest, noLeafTest)
 
 }
 
+TEST(ite, terminalCase)
+{
+    ClassProject::Manager table = ClassProject::Manager();
+    EXPECT_EQ(0, table.ite(0, 3, 3));
+    EXPECT_EQ(1, table.ite(1, 3, 3));
+}
+
+TEST(ite, OR_Case)
+{
+    ClassProject::Manager table = ClassProject::Manager();
+    ClassProject::BDD_ID idA = table.createVar("a");
+    ClassProject::BDD_ID idB = table.createVar("b");
+    table.ite(idA,1,idB);
+    EXPECT_EQ(table.Tabel.at(idA).Low, idB);
+    EXPECT_EQ(table.Tabel.at(idA).High, 1);
+}
+
+TEST(ite, AND_Case) {
+    ClassProject::Manager table = ClassProject::Manager();
+    ClassProject::BDD_ID idA = table.createVar("a");
+    ClassProject::BDD_ID idB = table.createVar("b");
+    table.ite(idA, idB, 0);
+    EXPECT_EQ(table.Tabel.at(idA).Low, 0);
+    EXPECT_EQ(table.Tabel.at(idA).High, idB);
+}
+
 TEST_F(ManagerFixture, FalseTest)
 {
     auto false_id = manager.False();

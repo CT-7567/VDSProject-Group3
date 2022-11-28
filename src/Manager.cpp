@@ -42,7 +42,7 @@ BDD_ID Manager::topVar(BDD_ID f)
 
 BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
 {
-    return 0;
+    return -1;
 }
 
 BDD_ID Manager::coFactorTrue(BDD_ID f, BDD_ID x)
