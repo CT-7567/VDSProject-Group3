@@ -89,6 +89,24 @@ TEST(ite, AND_Case) {
     EXPECT_EQ(table.Tabel.at(x).High, idB);
 }
 
+TEST(neg, terminalCase)
+{
+    ClassProject::Manager table = ClassProject::Manager();
+    EXPECT_EQ(table.neg(0), 1);
+    EXPECT_EQ(table.neg(1), 0);
+}
+
+TEST(neg, simpleCase)
+{
+    ClassProject::Manager table = ClassProject::Manager();
+    ClassProject::BDD_ID idA = table.createVar("a");
+    ClassProject::BDD_ID idB = table.createVar("aNot");
+    table.Tabel.at(idB).High = 0;
+    table.Tabel.at(idB).Low = 1;
+    EXPECT_EQ(table.neg(idA), idB);
+}
+
+
 TEST_F(ManagerFixture, FalseTest)
 {
     auto false_id = manager.False();
