@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Manager.h"
 
 namespace ClassProject {
@@ -45,17 +46,31 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
     if(isConstant(i)){
         return i;
     }
-    BDD_ID x1 = topVar(i);
-    BDD_ID x2 = topVar(t);
-    BDD_ID x3 = topVar(e);
-    BDD_ID x = std::min(x1, std::min(x2, x3));
-    BDD_ID rHigh = ite(coFactorTrue(i, x), coFactorTrue(t, x), coFactorTrue(e, x));
-    BDD_ID rLow = ite(coFactorFalse(i, x), coFactorFalse(t, x), coFactorFalse(e, x));
-    for(int j; j < Tabel.size(); i++){
+    BDD_ID x = topVar(i);
+    BDD_ID rHigh, rLow;
+    //BDD_ID rHigh = ite(coFactorTrue(i, x), coFactorTrue(t, x), coFactorTrue(e, x));
+    if(coFactorTrue(i, x) == 1){
+        rHigh = coFactorTrue(t, x);
+    }else{
+        rHigh = coFactorTrue(e, x);
+    }
+    //BDD_ID rLow = ite(coFactorFalse(i, x), coFactorFalse(t, x), coFactorFalse(e, x));
+    if(coFactorFalse(i, x) == 1){
+        rLow = coFactorFalse(t, x);
+    }else{
+        rLow = coFactorFalse(e, x);
+    }
+
+    if(rHigh == rLow){
+        return rHigh;
+    }
+
+    for(int j = 0; j < Tabel.size(); j++){
         if(Tabel.at(j).TopVar == x and Tabel.at(j).Low == rLow and Tabel.at(j).High == rHigh){
             return x;
         }
     }
+
     BDD_ID newID = Tabel.size();
     Tabel.insert({newID, {rHigh, rLow, x, "test"}});
     return newID;

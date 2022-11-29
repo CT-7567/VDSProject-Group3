@@ -76,18 +76,17 @@ TEST(ite, OR_Case)
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID idB = table.createVar("b");
-    table.ite(idA,1,idB);
-    EXPECT_EQ(table.Tabel.at(idA).Low, idB);
-    EXPECT_EQ(table.Tabel.at(idA).High, 1);
+    EXPECT_EQ(table.Tabel.at(table.ite(idA,table.True(),idB)).Low, idB);
+    EXPECT_EQ(table.Tabel.at(table.ite(idA,table.True(),idB)).High, 1);
 }
 
 TEST(ite, AND_Case) {
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID idB = table.createVar("b");
-    table.ite(idA, idB, 0);
-    EXPECT_EQ(table.Tabel.at(idA).Low, 0);
-    EXPECT_EQ(table.Tabel.at(idA).High, idB);
+    ClassProject::BDD_ID x = table.ite(idA, idB, 0);
+    EXPECT_EQ(table.Tabel.at(x).Low, 0);
+    EXPECT_EQ(table.Tabel.at(x).High, idB);
 }
 
 TEST_F(ManagerFixture, FalseTest)
