@@ -78,6 +78,9 @@ TEST(ite, OR_Case)
     ClassProject::BDD_ID idB = table.createVar("b");
     EXPECT_EQ(table.Tabel.at(table.ite(idA,table.True(),idB)).Low, idB);
     EXPECT_EQ(table.Tabel.at(table.ite(idA,table.True(),idB)).High, 1);
+
+    table.printTable();
+
 }
 
 TEST(ite, AND_Case) {
@@ -87,6 +90,10 @@ TEST(ite, AND_Case) {
     ClassProject::BDD_ID x = table.ite(idA, idB, 0);
     EXPECT_EQ(table.Tabel.at(x).Low, 0);
     EXPECT_EQ(table.Tabel.at(x).High, idB);
+
+
+    table.printTable();
+
 }
 
 TEST_F(ManagerFixture, FalseTest)
@@ -201,15 +208,13 @@ TEST_F(ManagerFixture, OrTest)
     auto a_or_b = manager.or2(var_a, var_b);
     auto A_or_B = manager.Tabel.at(a_or_b);
 
-    std::cout << "Label: " << A_or_B.Label << std::endl;
-    std::cout << "High: " << A_or_B.High << std::endl;
-    std::cout << "Low: " << A_or_B.Low << std::endl;
-    std::cout << "TopVa: " << A_or_B.TopVar << std::endl;
 
     EXPECT_EQ( A_or_B.Label , "(a + b)");
     EXPECT_EQ( A_or_B.High, 1);
     EXPECT_EQ( A_or_B.Low, 3);
     EXPECT_EQ( A_or_B.TopVar, 2);
+
+    manager.printTable();
 
 }
 
