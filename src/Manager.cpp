@@ -41,27 +41,29 @@ BDD_ID Manager::topVar(BDD_ID f)
     return Tabel.at(f).TopVar;
 }
 
-BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
-{
-    if(isConstant(i)){
-        if(i == 1){
+BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e) {
+    if (isConstant(i)) {
+        if (i == 1) {
             return t;
-        }else return e;
+        } else return e;
     }
-    BDD_ID x = topVar(i);
-    BDD_ID rHigh, rLow;
-    //BDD_ID rHigh = ite(coFactorTrue(i, x), coFactorTrue(t, x), coFactorTrue(e, x));
-    if(coFactorTrue(i, x) == 1){
-        rHigh = coFactorTrue(t, x);
-    }else{
-        rHigh = coFactorTrue(e, x);
-    }
-    //BDD_ID rLow = ite(coFactorFalse(i, x), coFactorFalse(t, x), coFactorFalse(e, x));
-    if(coFactorFalse(i, x) == 1){
-        rLow = coFactorFalse(t, x);
-    }else{
-        rLow = coFactorFalse(e, x);
-    }
+    BDD_ID rHigh, rLow, x;
+    auto TopA = topVar(i);
+    auto TopB = topVar(t);
+    auto TopC = topVar(e);
+    if (!isConstant(TopB) and !isConstant(TopC)) {
+        x = std::min(TopA, std::min(TopB, TopC));
+    } else if (!isConstant(TopB) and isConstant(TopC)){
+        x = std::min(TopB, TopA);
+    } else if (isConstant(TopB) and !isConstant(TopC)){
+        x = std::min(TopA, TopC);
+    } else x = TopA;
+
+
+    rHigh = ite(coFactorTrue(i, x), coFactorTrue(t, x), coFactorTrue(e, x));
+
+    rLow = ite(coFactorFalse(i, x), coFactorFalse(t, x), coFactorFalse(e, x));
+
 
     if(rHigh == rLow){
         return rHigh;
@@ -80,7 +82,7 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
 
 BDD_ID Manager::coFactorTrue(BDD_ID f, BDD_ID x)
 {
-        // Terminal cases
+    // Terminal cases
     if (isConstant(f) || isConstant(x) || topVar(f) > x) {
         return f;
     }
