@@ -89,8 +89,8 @@ BDD_ID Manager::coFactorTrue(BDD_ID f, BDD_ID x)
         return Tabel.at(f).High;
     }
 
-    auto true_case = coFactorFalse(Tabel.at(f).High, x);
-    auto false_case = coFactorFalse(Tabel.at(f).Low, x);
+    auto true_case = coFactorTrue(Tabel.at(f).High, x);
+    auto false_case = coFactorTrue(Tabel.at(f).Low, x);
 
     return ite(topVar(f), true_case, false_case);
 }
