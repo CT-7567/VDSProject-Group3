@@ -250,7 +250,7 @@ TEST_F(ManagerFixture, OrTest)
     auto A_or_B = manager.Tabel.at(a_or_b);
 
 
-    EXPECT_EQ( A_or_B.Label , "(a + b)");
+    EXPECT_EQ( A_or_B.Label , "(a+b)");
     EXPECT_EQ( A_or_B.High, 1);
     EXPECT_EQ( A_or_B.Low, 3);
     EXPECT_EQ( A_or_B.TopVar, 2);
@@ -261,40 +261,46 @@ TEST_F(ManagerFixture, OrTest)
 
 TEST_F(ManagerFixture, AndTest)
 { 
-    auto a_or_b = manager.and2(var_a, var_b);
-    auto A_or_B = manager.Tabel.at(a_or_b);
+    auto a_and_b = manager.and2(var_a, var_b);
+    auto A_and_B = manager.Tabel.at(a_and_b);
 
-    EXPECT_EQ( A_or_B.Label , "(a * b)");
-    EXPECT_EQ( A_or_B.High, 3);
-    EXPECT_EQ( A_or_B.Low, 0);
-    EXPECT_EQ( A_or_B.TopVar, 2);
+    EXPECT_EQ( A_and_B.Label , "(a*b)");
+    EXPECT_EQ( A_and_B.High, var_b);
+    EXPECT_EQ( A_and_B.Low, manager.False());
+    EXPECT_EQ( A_and_B.TopVar, var_a);
+
+    manager.printTable();
 
 }
 
 TEST_F(ManagerFixture, CoFacTrueTest)
 { 
 
-    EXPECT_EQ( manager.coFactorTrue(var_a, var_a), 1);
-    EXPECT_EQ( manager.coFactorTrue(var_a), 1);
-    EXPECT_EQ( manager.coFactorTrue( 1, var_a), 1);
+    EXPECT_EQ( manager.coFactorTrue(var_a, var_a), manager.True() );
+    EXPECT_EQ( manager.coFactorTrue(var_a), manager.True());
+    EXPECT_EQ( manager.coFactorTrue( manager.True(), var_a), manager.True());
     EXPECT_EQ( manager.coFactorTrue(var_b, var_a), var_b);
 
-    EXPECT_EQ( manager.coFactorTrue(var_c, var_c), 1);
-    EXPECT_EQ( manager.coFactorTrue(var_c), 1);
+    EXPECT_EQ( manager.coFactorTrue(var_c, var_c), manager.True());
+    EXPECT_EQ( manager.coFactorTrue(var_c), manager.True());
     EXPECT_EQ( manager.coFactorTrue(var_d, var_c), var_d);
-    EXPECT_EQ( manager.coFactorTrue( 0, var_c), 0);
+    EXPECT_EQ( manager.coFactorTrue( manager.False(), var_c), manager.False());
 
     auto a_or_b = manager.or2(var_a, var_b);
-    EXPECT_EQ(manager.coFactorTrue(a_or_b), var_a);
-    EXPECT_EQ(manager.coFactorTrue(a_or_b, var_b), var_b);
-    EXPECT_EQ(manager.coFactorTrue(a_or_b, var_c), var_c);
+    EXPECT_EQ(manager.coFactorTrue(a_or_b), manager.True() );
+    EXPECT_EQ(manager.coFactorTrue(a_or_b, var_b), manager.True());
+    //EXPECT_EQ(manager.coFactorTrue(a_or_b, var_c), a_or_b);
 
 
 
     auto a_and_b = manager.and2(var_a, var_b);
 
-    EXPECT_EQ(manager.coFactorFalse(a_and_b), manager.True() );
-    EXPECT_EQ(manager.coFactorFalse(a_and_b, var_b), var_a);
+    EXPECT_EQ(manager.coFactorTrue(a_and_b), var_b );
+    EXPECT_EQ(manager.coFactorTrue(a_and_b, var_b), var_a);
+    //EXPECT_EQ(manager.coFactorTrue(a_and_b, var_c), a_and_b);
+
+    manager.printTable();
+
 
 }
 

@@ -148,8 +148,8 @@ BDD_ID Manager::and2(BDD_ID a, BDD_ID b)
         
     Tabel.at(a_and_b).TopVar = Top;
 
-    Tabel.at(a_and_b).High = ite( coFactorTrue(a, Top), coFactorTrue(FALSE_ID, Top), coFactorTrue(b, Top) );
-    Tabel.at(a_and_b).Low = ite( coFactorFalse(a, Top), coFactorFalse(FALSE_ID, Top), coFactorFalse(b, Top) );
+    Tabel.at(a_and_b).High = ite( coFactorTrue(a, Top), coFactorTrue(b, Top), coFactorTrue(FALSE_ID, Top) );
+    Tabel.at(a_and_b).Low = ite( coFactorFalse(a, Top), coFactorFalse(b, Top), coFactorFalse(FALSE_ID, Top) );
 
     return a_and_b;
 }
