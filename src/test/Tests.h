@@ -107,12 +107,35 @@ TEST(neg, simpleCase)
 {
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
-    ClassProject::BDD_ID idB = table.createVar("aNot");
-    table.Tabel.at(idB).High = 0;
-    table.Tabel.at(idB).Low = 1;
-    EXPECT_EQ(table.neg(idA), idB);
+    ClassProject::BDD_ID test = table.neg(idA);
+    EXPECT_EQ(table.Tabel.at(test).Low, 1);
+    EXPECT_EQ(table.Tabel.at(test).High, 0);
+    //two times neg should be the original
+    EXPECT_EQ(table.neg(test), idA);
 }
 
+TEST(neg, complexCase)
+{
+    ClassProject::Manager table = ClassProject::Manager();
+    ClassProject::BDD_ID idA = table.createVar("a");
+    ClassProject::BDD_ID idB = table.createVar("b");
+    ClassProject::BDD_ID idAn = table.createVar("an");
+    table.Tabel.at(idAn).Low = 1;
+    table.Tabel.at(idAn).High = 0;
+    ClassProject::BDD_ID idBn = table.createVar("bn");
+    table.Tabel.at(idBn).Low = 1;
+    table.Tabel.at(idBn).High = 0;
+    ClassProject::BDD_ID or_id = table.ite(idA, 1, idB);
+    ClassProject::BDD_ID or_not_id = table.neg(or_id);
+    std::cout<<"ID or not : "<<  or_not_id << std::endl;
+    EXPECT_EQ(table.Tabel.at(or_not_id).High, 0);
+    ClassProject::BDD_ID idB_not = table.Tabel.at(or_not_id).Low;
+    std::cout<<"ID b not : "<<  idB_not << std::endl;
+    EXPECT_EQ(table.Tabel.at(or_not_id).Low, idB_not);
+    EXPECT_EQ(table.Tabel.at(idB_not).Low, 1);
+    EXPECT_EQ(table.Tabel.at(idB_not).High, 0);
+    table.printTable();
+}
 
 TEST_F(ManagerFixture, FalseTest)
 {
