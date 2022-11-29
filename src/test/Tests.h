@@ -67,8 +67,8 @@ TEST(isConstantTest, noLeafTest)
 TEST(ite, terminalCase)
 {
     ClassProject::Manager table = ClassProject::Manager();
-    EXPECT_EQ(0, table.ite(0, 3, 3));
-    EXPECT_EQ(1, table.ite(1, 3, 3));
+    EXPECT_EQ(0, table.ite(0, 3, 0));
+    EXPECT_EQ(1, table.ite(1, 1, 3));
 }
 
 TEST(ite, OR_Case)
@@ -92,8 +92,8 @@ TEST(ite, AND_Case) {
 TEST(neg, terminalCase)
 {
     ClassProject::Manager table = ClassProject::Manager();
-    EXPECT_EQ(table.neg(0), 1);
-    EXPECT_EQ(table.neg(1), 0);
+    EXPECT_EQ(table.neg(table.True()), 0);
+    EXPECT_EQ(table.neg(table.False()), 1);
 }
 
 TEST(neg, simpleCase)

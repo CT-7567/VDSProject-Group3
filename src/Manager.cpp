@@ -44,7 +44,9 @@ BDD_ID Manager::topVar(BDD_ID f)
 BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
 {
     if(isConstant(i)){
-        return i;
+        if(i == 1){
+            return t;
+        }else return e;
     }
     BDD_ID x = topVar(i);
     BDD_ID rHigh, rLow;
