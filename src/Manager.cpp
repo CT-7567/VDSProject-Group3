@@ -129,24 +129,51 @@ BDD_ID Manager::neg(BDD_ID a)
 
 BDD_ID Manager::and2(BDD_ID a, BDD_ID b)
 {
-    auto a_and_b = createVar(( "("+Tabel.at(a).Label+" * "+Tabel.at(b).Label+")" ));
+    auto a_and_b = createVar(( "("+Tabel.at(a).Label+"*"+Tabel.at(b).Label+")" ));
 
-    Tabel.at(a_and_b).TopVar = ite( a, FALSE_ID, b );
+    auto TopA = topVar(a);
+    auto TopB = topVar(b);
+    BDD_ID Top;
 
-    Tabel.at(a_and_b).High = ite( coFactorTrue(a, a), coFactorTrue(FALSE_ID, a), coFactorTrue(b, a) );
-    Tabel.at(a_and_b).Low = ite( coFactorFalse(a, a), coFactorFalse(FALSE_ID, a), coFactorFalse(b, a) );
+    if(TopA <= TopB)
+    {
+        Top = TopA;
+    }
+    else
+    {
+        Top = TopB;
+    }
+        
+    Tabel.at(a_and_b).TopVar = Top;
+
+    Tabel.at(a_and_b).High = ite( coFactorTrue(a, Top), coFactorTrue(FALSE_ID, Top), coFactorTrue(b, Top) );
+    Tabel.at(a_and_b).Low = ite( coFactorFalse(a, Top), coFactorFalse(FALSE_ID, Top), coFactorFalse(b, Top) );
 
     return a_and_b;
 }
 
 BDD_ID Manager::or2(BDD_ID a, BDD_ID b)
 {
-    auto a_or_b = createVar(( "("+Tabel.at(a).Label+" + "+Tabel.at(b).Label+")" ));
+    auto a_or_b = createVar(( "("+Tabel.at(a).Label+"+"+Tabel.at(b).Label+")" ));
 
-    Tabel.at(a_or_b).TopVar = ite( a, 1, b );
+    auto TopA = topVar(a);
+    auto TopB = topVar(b);
+    BDD_ID Top;
 
-    Tabel.at(a_or_b).High = ite( coFactorTrue(a, a), coFactorTrue(TRUE_ID, a), coFactorTrue(b, a) );
-    Tabel.at(a_or_b).Low = ite( coFactorFalse(a, a), coFactorFalse(TRUE_ID, a), coFactorFalse(b, a) );
+    if(TopA <= TopB)
+    {
+        Top = TopA;
+    }
+    else
+    {
+        Top = TopB;
+    }
+        
+    Tabel.at(a_or_b).TopVar = Top;
+
+
+    Tabel.at(a_or_b).High = ite( coFactorTrue(a, Top), coFactorTrue(TRUE_ID, Top), coFactorTrue(b, Top) );
+    Tabel.at(a_or_b).Low = ite( coFactorFalse(a, Top), coFactorFalse(TRUE_ID, Top), coFactorFalse(b, Top) );
 
     return a_or_b;
 
@@ -184,5 +211,20 @@ void Manager::findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root)
 size_t Manager::uniqueTableSize()
 {
 }
+
+
+
+void Manager::printTable()
+{
+
+    for( int i=0; i < Tabel.size(); i++ )
+    {
+
+        std::cout<<"ID: "<<  i  << "     |   Label: " << Tabel.at(i).Label << "     |   High: " << Tabel.at(i).High << "        |   Low: " <<  Tabel.at(i).Low << "     |   TopVar: "<< Tabel.at(i).TopVar << std::endl;  
+
+    }
+
+}
+
 
 }; // namespace ClassProject

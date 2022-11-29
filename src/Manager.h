@@ -78,6 +78,10 @@ class Manager:public ManagerInterface{
     virtual void findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root);
 
     virtual size_t uniqueTableSize();
+
+    virtual void printTable();
+
+
 };
 
 } // namespace ClassProject
