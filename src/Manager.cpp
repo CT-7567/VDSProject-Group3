@@ -183,18 +183,40 @@ BDD_ID Manager::or2(BDD_ID a, BDD_ID b)
 
 BDD_ID Manager::xor2(BDD_ID a, BDD_ID b)
 {
+    
+    auto a_xor_b = or2( and2(neg(a), b), and2(a, neg(b) ) );
+
+    Tabel.at(a_xor_b).Label = "("+Tabel.at(a).Label+"⊕"+Tabel.at(b).Label+")";
+
+    return a_xor_b;
+    
 }
 
 BDD_ID Manager::nand2(BDD_ID a, BDD_ID b)
 {
+    auto a_nand_b = neg( and2(a, b) );
+
+    Tabel.at(a_nand_b).Label = "~("+Tabel.at(a).Label+"*"+Tabel.at(b).Label+")";
+
+    return a_nand_b;
 }
 
 BDD_ID Manager::nor2(BDD_ID a, BDD_ID b)
 {
+    auto a_nor_b = neg( or2(a, b) );
+
+    Tabel.at(a_nor_b).Label = "~("+Tabel.at(a).Label+"+"+Tabel.at(b).Label+")";
+
+    return a_nor_b;
 }
 
 BDD_ID Manager::xnor2(BDD_ID a, BDD_ID b)
 {
+    auto a_xnor_b = neg( xor2(a, b) );
+
+    Tabel.at(a_xnor_b).Label = "~("+Tabel.at(a).Label+"⊕"+Tabel.at(b).Label+")";
+
+    return a_xnor_b;
 }
 
 std::string Manager::getTopVarName(const BDD_ID &root)
