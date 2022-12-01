@@ -366,8 +366,8 @@ TEST_F(ManagerFixture, XnorTest)
     auto a_xnor_b = manager.xnor2(var_a, var_b);
     auto A_xnor_B = manager.Tabel.at(a_xnor_b);
 
-    EXPECT_EQ( A_xnor_B.High, manager.True());
-    EXPECT_EQ( A_xnor_B.TopVar, var_b);
+    EXPECT_EQ( A_xnor_B.High, var_b);
+    EXPECT_EQ( A_xnor_B.TopVar, var_a);
 
     auto bnot = A_xnor_B.Low;
     auto Bnot = manager.Tabel.at(bnot);
@@ -375,6 +375,41 @@ TEST_F(ManagerFixture, XnorTest)
     EXPECT_EQ( Bnot.High, manager.False() );   
     EXPECT_EQ( Bnot.Low, manager.True() );
     EXPECT_EQ( Bnot.TopVar, var_b);
+
+
+
+    auto c_and_d = manager.and2( var_d, var_c );
+
+    auto a_xnor_c_and_d = manager.xnor2(var_a, c_and_d);
+    auto A_xnor_c_and_d = manager.Tabel.at(a_xnor_c_and_d);
+
+    auto c_and_dT = A_xnor_c_and_d.High;
+    auto C_and_D = manager.Tabel.at(c_and_d);
+
+    auto c_and_dT_not = A_xnor_c_and_d.Low;
+    auto C_and_D_not = manager.Tabel.at(c_and_dT_not);
+
+    EXPECT_EQ( c_and_d, c_and_dT );
+
+    EXPECT_EQ( C_and_D_not.TopVar, var_c );
+    EXPECT_EQ( C_and_D_not.High, var_d);
+    EXPECT_EQ( C_and_D_not.Low, manager.True() );
+
+
+    auto c_nand_d = manager.nand2( var_d, var_c );
+    auto C_nand_D = manager.Tabel.at(c_nand_d);
+
+    EXPECT_EQ( C_and_D_not.TopVar, C_nand_D.TopVar );
+    EXPECT_EQ( C_and_D_not.Low, C_nand_D.Low );
+
+/*
+    auto notd = C_nand_D.High;
+    auto notD = manager.Tabel.at(notd);
+
+    EXPECT_EQ( C_and_D_not.High, C_nand_D.High );
+    EXPECT_EQ( C_and_D_not.TopVar, C_nand_D.TopVar );
+    EXPECT_EQ( C_and_D_not.Low, C_nand_D.Low );
+*/
 
     manager.printTable();
 }
