@@ -249,11 +249,10 @@ TEST_F(ManagerFixture, OrTest)
     auto a_or_b = manager.or2(var_a, var_b);
     auto A_or_B = manager.Tabel.at(a_or_b);
 
-
     EXPECT_EQ( A_or_B.Label , "(a+b)");
-    EXPECT_EQ( A_or_B.High, 1);
-    EXPECT_EQ( A_or_B.Low, 3);
-    EXPECT_EQ( A_or_B.TopVar, 2);
+    EXPECT_EQ( A_or_B.High, manager.True() );
+    EXPECT_EQ( A_or_B.Low, var_b);
+    EXPECT_EQ( A_or_B.TopVar, var_a);
 
     manager.printTable();
 

@@ -131,6 +131,15 @@ BDD_ID Manager::neg(BDD_ID a)
 
 BDD_ID Manager::and2(BDD_ID a, BDD_ID b)
 {
+   
+    auto a_and_b = ite( a, b, FALSE_ID );
+
+    Tabel.at(a_and_b).Label = "("+Tabel.at(a).Label+"*"+Tabel.at(b).Label+")";
+
+    return a_and_b;
+
+
+   /*
     auto a_and_b = createVar(( "("+Tabel.at(a).Label+"*"+Tabel.at(b).Label+")" ));
 
     auto TopA = topVar(a);
@@ -152,10 +161,20 @@ BDD_ID Manager::and2(BDD_ID a, BDD_ID b)
     Tabel.at(a_and_b).Low = ite( coFactorFalse(a, Top), coFactorFalse(b, Top), coFactorFalse(FALSE_ID, Top) );
 
     return a_and_b;
+    */
 }
 
 BDD_ID Manager::or2(BDD_ID a, BDD_ID b)
 {
+
+    auto a_or_b = ite( a, TRUE_ID, b);
+
+    Tabel.at(a_or_b).Label = "("+Tabel.at(a).Label+"+"+Tabel.at(b).Label+")";
+
+    return a_or_b;
+
+
+/*
     auto a_or_b = createVar(( "("+Tabel.at(a).Label+"+"+Tabel.at(b).Label+")" ));
 
     auto TopA = topVar(a);
@@ -178,7 +197,7 @@ BDD_ID Manager::or2(BDD_ID a, BDD_ID b)
     Tabel.at(a_or_b).Low = ite( coFactorFalse(a, Top), coFactorFalse(TRUE_ID, Top), coFactorFalse(b, Top) );
 
     return a_or_b;
-
+    */
 }
 
 BDD_ID Manager::xor2(BDD_ID a, BDD_ID b)
