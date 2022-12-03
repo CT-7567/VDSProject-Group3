@@ -71,7 +71,7 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e) {
 
     for(int j = 0; j < Tabel.size(); j++){
         if(Tabel.at(j).TopVar == x and Tabel.at(j).Low == rLow and Tabel.at(j).High == rHigh){
-            return x;
+            return j;
         }
     }
 
@@ -277,6 +277,7 @@ void Manager::findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root)
 
 size_t Manager::uniqueTableSize()
 {
+    return 0;
 }
 
 

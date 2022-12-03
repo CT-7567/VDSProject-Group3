@@ -169,8 +169,11 @@ TEST_F(ManagerFixture, TopVarTest)
 
 TEST_F(ManagerFixture, CoFactorFalseTest)
 {
-    EXPECT_EQ(manager.coFactorFalse(function), var_b);
-    EXPECT_EQ(manager.coFactorFalse(function, var_a), var_b);
+    auto b_and_c = manager.and2(var_b, var_c);
+    auto b_and_c_and_d = manager.and2(b_and_c, var_d);
+
+    EXPECT_EQ(manager.coFactorFalse(function), b_and_c_and_d);
+    EXPECT_EQ(manager.coFactorFalse(function, var_a), b_and_c_and_d);
 
     auto a_and_c = manager.and2(var_a, var_c);
     auto a_and_c_and_d = manager.and2(a_and_c, var_d);
@@ -195,7 +198,6 @@ TEST_F(ManagerFixture, CoFactorFalseTest)
 
     // Test terminal cases
     EXPECT_EQ(manager.coFactorFalse(function, manager.False()), function);
-    EXPECT_EQ(manager.coFactorFalse(var_b, function), function);
     EXPECT_EQ(manager.coFactorFalse(manager.False(), var_a), manager.False());
     EXPECT_EQ(manager.coFactorFalse(manager.True(), var_a), manager.True());
 }
