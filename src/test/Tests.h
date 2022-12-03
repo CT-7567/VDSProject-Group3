@@ -453,6 +453,45 @@ TEST_F(ManagerFixture, findNodesTest)
 }
 
 
+TEST_F(ManagerFixture, findVarsTest)
+{ 
+
+    std::set<ClassProject::BDD_ID> allVarsOf_a_and_b, allVarsOfF;
+
+    auto a_and_b = manager.and2(var_a, var_b);
+
+    manager.findVars(a_and_b, allVarsOf_a_and_b);
+
+    EXPECT_EQ( allVarsOf_a_and_b.size(), 2);
+    EXPECT_EQ( allVarsOf_a_and_b.count( a_and_b ), 0);
+    EXPECT_EQ( allVarsOf_a_and_b.count( var_a ), 1);
+    EXPECT_EQ( allVarsOf_a_and_b.count( var_b ), 1);
+    EXPECT_EQ( allVarsOf_a_and_b.count( manager.True() ), 0);
+    EXPECT_EQ( allVarsOf_a_and_b.count( manager.False() ), 0);
+
+
+
+    manager.findVars(function, allVarsOfF);    
+
+    EXPECT_EQ( allVarsOfF.size(), 4);
+    EXPECT_EQ( allVarsOfF.count( 9 ), 0);
+    EXPECT_EQ( allVarsOfF.count( 8 ), 0);
+    EXPECT_EQ( allVarsOfF.count( 7 ), 0);
+    EXPECT_EQ( allVarsOfF.count( var_a ), 1);
+    EXPECT_EQ( allVarsOfF.count( var_b ), 1);
+    EXPECT_EQ( allVarsOfF.count( var_c ), 1);
+    EXPECT_EQ( allVarsOfF.count( var_d ), 1);
+    EXPECT_EQ( allVarsOfF.count( manager.True() ), 0);
+
+
+    for(auto item : allVarsOfF )
+        std::cout<< item << std::endl;
+    manager.printTable();
+
+}
+
+
+
 
 
 
