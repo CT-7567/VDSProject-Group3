@@ -469,6 +469,9 @@ TEST_F(ManagerFixture, findVarsTest)
     EXPECT_EQ( allVarsOf_a_and_b.count( manager.True() ), 0);
     EXPECT_EQ( allVarsOf_a_and_b.count( manager.False() ), 0);
 
+    std::cout<<"Var of a*b: "<<std::endl;
+    for(auto item : allVarsOf_a_and_b )
+        std::cout<< "ID: "<<item<<"     | Label: " <<manager.Tabel.at(item).Label<<"\n\n" << std::endl;
 
 
     manager.findVars(function, allVarsOfF);    
@@ -483,9 +486,9 @@ TEST_F(ManagerFixture, findVarsTest)
     EXPECT_EQ( allVarsOfF.count( var_d ), 1);
     EXPECT_EQ( allVarsOfF.count( manager.True() ), 0);
 
-
+    std::cout<<"Var of fkt: "<<std::endl;
     for(auto item : allVarsOfF )
-        std::cout<< item << std::endl;
+        std::cout<< "ID: "<<item<<"     | Label: " <<manager.Tabel.at(item).Label<<"\n\n" << std::endl;
     manager.printTable();
 
 }

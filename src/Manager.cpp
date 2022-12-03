@@ -249,10 +249,30 @@ std::string Manager::getTopVarName(const BDD_ID &root)
 
 void Manager::findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root)
 {
+
+    if( !isVariable(root) && !isConstant(root) )
+    {
+        
+        nodes_of_root.insert( root );
+
+        findNodes( Tabel.at(root).High, nodes_of_root);
+
+        findNodes( Tabel.at(root).Low, nodes_of_root);
+    }
 }
 
 void Manager::findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root)
 {
+
+    if( !isConstant(root) )
+    {
+
+        vars_of_root.insert( topVar(root) );
+        
+        findVars( Tabel.at(root).High, vars_of_root);
+
+        findVars( Tabel.at(root).Low, vars_of_root);
+    }
 }
 
 size_t Manager::uniqueTableSize()
