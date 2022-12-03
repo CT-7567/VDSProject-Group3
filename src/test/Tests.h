@@ -413,6 +413,44 @@ TEST_F(ManagerFixture, XnorTest)
     manager.printTable();
 }
 
+TEST_F(ManagerFixture, findNodesTest)
+{ 
+
+    std::set<ClassProject::BDD_ID> allNodesOf_a_and_b, allNodesOfF;
+
+    auto a_and_b = manager.and2(var_a, var_b);
+
+    manager.findNodes(a_and_b, allNodesOf_a_and_b);
+
+
+    EXPECT_EQ( allNodesOf_a_and_b.size(), 1);
+    EXPECT_EQ( allNodesOf_a_and_b.count( a_and_b ), 1);
+    EXPECT_EQ( allNodesOf_a_and_b.count( var_a ), 0);
+    EXPECT_EQ( allNodesOf_a_and_b.count( var_b ), 0);
+    EXPECT_EQ( allNodesOf_a_and_b.count( manager.True() ), 0);
+    EXPECT_EQ( allNodesOf_a_and_b.count( manager.False() ), 0);
+
+
+
+
+    manager.findNodes(function, allNodesOfF);    
+
+
+    EXPECT_EQ( allNodesOfF.size(), 3);
+    EXPECT_EQ( allNodesOfF.count( 9 ), 1);
+    EXPECT_EQ( allNodesOfF.count( 8 ), 1);
+    EXPECT_EQ( allNodesOfF.count( 7 ), 1);
+    EXPECT_EQ( allNodesOfF.count( var_a ), 0);
+    EXPECT_EQ( allNodesOfF.count( manager.True() ), 0);
+
+
+
+
+    for(auto item : allNodesOfF )
+        std::cout<< item << std::endl;
+    manager.printTable();
+
+}
 
 
 
