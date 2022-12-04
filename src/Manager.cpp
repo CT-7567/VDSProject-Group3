@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include "Manager.h"
 
 namespace ClassProject {
@@ -280,19 +281,16 @@ size_t Manager::uniqueTableSize()
     return 0;
 }
 
-
-
 void Manager::printTable()
 {
+    std::cout << std::setw(10) << "ID" << std::setw(25) << "Label" << std::setw(10) << "High" << std::setw(10) << "Low"
+              << std::setw(10) << "TopVar" << std::endl;
 
-    for( int i=0; i < Tabel.size(); i++ )
-    {
-
-        std::cout<<"ID: "<<  i  << "     |   Label: " << Tabel.at(i).Label << "     |   High: " << Tabel.at(i).High << "        |   Low: " <<  Tabel.at(i).Low << "     |   TopVar: "<< Tabel.at(i).TopVar << std::endl;  
-
+    for (int i = 0; i < Tabel.size(); i++) {
+        auto const &node = Tabel.at(i);
+        std::cout << std::setw(10) << i << std::setw(25) << node.Label << std::setw(10) << node.High << std::setw(10)
+                  << node.Low << std::setw(10) << node.TopVar << std::endl;
     }
-
 }
-
 
 }; // namespace ClassProject
