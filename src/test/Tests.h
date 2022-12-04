@@ -377,8 +377,6 @@ TEST_F(ManagerFixture, XnorTest)
     EXPECT_EQ( Bnot.Low, manager.True() );
     EXPECT_EQ( Bnot.TopVar, var_b);
 
-
-
     auto c_and_d = manager.and2( var_d, var_c );
 
     auto a_xnor_c_and_d = manager.xnor2(var_a, c_and_d);
@@ -495,9 +493,20 @@ TEST_F(ManagerFixture, findVarsTest)
 
 }
 
+TEST_F(ManagerFixture, UniqueTableSizeTest)
+{
+    // Should be 10 as seen on page 6 of the project document.
+    const std::size_t START_TABLE_SIZE = 10;
+    std::size_t table_size = START_TABLE_SIZE;
+    EXPECT_EQ(manager.uniqueTableSize(), table_size);
 
+    // Add some more variables:
+    manager.createVar("x1");
+    manager.createVar("x2");
+    manager.createVar("x3");
+    table_size += 3;
 
-
-
+    EXPECT_EQ(manager.uniqueTableSize(), table_size);
+}
 
 #endif
