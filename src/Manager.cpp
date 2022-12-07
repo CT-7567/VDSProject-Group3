@@ -82,9 +82,9 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e) {
     } else if(rHigh == FALSE_ID and rLow == TRUE_ID){
         new_label = "~" + Tabel.at(Tabel.at(x).TopVar).Label;
     }else if(rLow == TRUE_ID){
-        new_label = "(~" + Tabel.at(Tabel.at(x).TopVar).Label + Tabel.at(rHigh).Label + ")";
+        new_label = "(~" + Tabel.at(Tabel.at(x).TopVar).Label + + "+" +Tabel.at(rHigh).Label + ")";
     } else if(rHigh == FALSE_ID){
-        new_label = "( ~" + Tabel.at(Tabel.at(x).TopVar).Label + "+" + Tabel.at(rLow).Label + ")";
+        new_label = "(~" + Tabel.at(Tabel.at(x).TopVar).Label + "*" + Tabel.at(rLow).Label + ")";
     } else if (rLow == FALSE_ID){
         new_label = "(" + Tabel.at(Tabel.at(x).TopVar).Label + "*" + Tabel.at(rHigh).Label + ")";
     }
