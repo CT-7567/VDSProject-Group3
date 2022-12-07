@@ -138,7 +138,9 @@ BDD_ID Manager::coFactorFalse(BDD_ID f)
 
 BDD_ID Manager::neg(BDD_ID a)
 {
-    return ite(a, 0, 1);
+    BDD_ID temp = ite(a, 0, 1);
+    Tabel.at(temp).Label = "~" + Tabel.at(a).Label;
+    return temp;
 }
 
 BDD_ID Manager::and2(BDD_ID a, BDD_ID b)
