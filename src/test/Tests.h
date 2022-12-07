@@ -466,7 +466,7 @@ TEST_F(ManagerFixture, XnorTest)
     EXPECT_EQ( c_and_d, c_and_dT );
 
     EXPECT_EQ( C_and_D_not.TopVar, var_c );
-    EXPECT_EQ( C_and_D_not.High, var_d);
+    EXPECT_EQ( C_and_D_not.High, 16);               //16 = notD
     EXPECT_EQ( C_and_D_not.Low, manager.True() );
 
 
@@ -476,14 +476,6 @@ TEST_F(ManagerFixture, XnorTest)
     EXPECT_EQ( C_and_D_not.TopVar, C_nand_D.TopVar );
     EXPECT_EQ( C_and_D_not.Low, C_nand_D.Low );
 
-/*
-    auto notd = C_nand_D.High;
-    auto notD = manager.Tabel.at(notd);
-
-    EXPECT_EQ( C_and_D_not.High, C_nand_D.High );
-    EXPECT_EQ( C_and_D_not.TopVar, C_nand_D.TopVar );
-    EXPECT_EQ( C_and_D_not.Low, C_nand_D.Low );
-*/
 
     manager.printTable();
 }
