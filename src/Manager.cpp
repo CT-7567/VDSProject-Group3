@@ -232,12 +232,9 @@ BDD_ID Manager::nor2(BDD_ID a, BDD_ID b)
 
 BDD_ID Manager::xnor2(BDD_ID a, BDD_ID b)
 {
-    //implementation from sascha
-    //auto a_xnor_b = neg( xor2(a, b) );
-    //try different implementation
-    auto bn = neg(Tabel.at(b).TopVar);
-    Tabel.at(bn).Label = "~b";
-    auto a_xnor_b = ite(a, b, bn);
+
+    auto a_xnor_b = neg( xor2(a, b) );
+
     Tabel.at(a_xnor_b).Label = "~("+Tabel.at(a).Label+"⊕"+Tabel.at(b).Label+")";
 
     return a_xnor_b;
