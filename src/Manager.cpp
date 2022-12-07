@@ -75,9 +75,20 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e) {
             return j;
         }
     }
-
     BDD_ID newID = Tabel.size();
-    Tabel.insert({newID, {rHigh, rLow, x, "test"}});
+    std::string new_label = "test";
+    if(rHigh == TRUE_ID) {
+        new_label = "(" + Tabel.at(Tabel.at(x).TopVar).Label + "+" + Tabel.at(rLow).Label + ")";
+    } else if(rHigh == FALSE_ID and rLow == TRUE_ID){
+        new_label = "~" + Tabel.at(Tabel.at(x).TopVar).Label;
+    }else if(rLow == TRUE_ID){
+        new_label = "(~" + Tabel.at(Tabel.at(x).TopVar).Label + Tabel.at(rHigh).Label + ")";
+    } else if(rHigh == FALSE_ID){
+        new_label = "( ~" + Tabel.at(Tabel.at(x).TopVar).Label + "+" + Tabel.at(rLow).Label + ")";
+    } else if (rLow == FALSE_ID){
+        new_label = "(" + Tabel.at(Tabel.at(x).TopVar).Label + "*" + Tabel.at(rHigh).Label + ")";
+    }
+    Tabel.insert({newID, {rHigh, rLow, x, new_label}});
     return newID;
 }
 
