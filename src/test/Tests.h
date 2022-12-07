@@ -137,6 +137,81 @@ TEST(neg, complexCase)
     table.printTable();
 }
 
+TEST(neg, withFunction){
+    ClassProject::Manager table = ClassProject::Manager();
+    ClassProject::BDD_ID idA = table.createVar("a");
+    ClassProject::BDD_ID idB = table.createVar("b");
+    ClassProject::BDD_ID idC = table.createVar("c");
+    ClassProject::BDD_ID idD = table.createVar("d");
+    ClassProject::BDD_ID idA_and_B = table.and2(idA, idB);
+    ClassProject::BDD_ID idC_and_D = table.and2(idC, idD);
+    ClassProject::BDD_ID idF = table.or2(idA_and_B, idC_and_D);
+    ClassProject::BDD_ID id_not_F = table.neg(idF);
+    /*      a   b   c   d   |f
+     * 01:  0   0   0   0   |1
+     * --------------------------
+     *      a   b   c   d   |f
+     * 02:  0   0   0   1   |1
+     * ---------------------------
+     *      a   b   c   d   |f
+     * 03:  0   0   1   0   |1
+     * ---------------------------
+     *      a   b   c   d   |f
+     * 04:  0   0   1   1   |0
+     * ---------------------------
+     *      a   b   c   d   |f
+     * 05:  0   1   0   0   |1
+     * ----------------------------
+     *      a   b   c   d   |f
+     * 06:  0   1   0   1   |1
+     * ----------------------------
+     *      a   b   c   d   |f
+     * 07:  0   1   1   0   |1
+     * ----------------------------
+     *      a   b   c   d   |f
+     * 08:  0   1   1   1   |0
+     * ----------------------------
+     *      a   b   c   d   |f
+     * 09:  1   0   0   0   |1
+     * ----------------------------
+     *      a   b   c   d   |f
+     * 10:  1   0   0   1   |1
+     * ----------------------------
+     *      a   b   c   d   |f
+     * 11:  1   0   1   0   |1
+     *  ----------------------------
+     *      a   b   c   d   |f
+     * 12:  1   0   1   1   |0
+     *  ----------------------------
+     *      a   b   c   d   |f
+     * 13:  1   1   0   0   |0
+     *  ----------------------------
+     *      a   b   c   d   |f
+     * 14:  1   1   0   1   |0
+     *  ----------------------------
+     *      a   b   c   d   |f
+     * 15:  1   1   1   0   |0
+     *  ----------------------------
+     *      a   b   c   d   |f
+     * 16:  1   1   1   1   |0
+     */
+    //13,14,15,16
+    EXPECT_EQ(table.Tabel.at(table.Tabel.at(id_not_F).High).High, 0);
+    //1,2,5,6
+    EXPECT_EQ(table.Tabel.at(table.Tabel.at(id_not_F).Low).Low, 1);
+    //4,8
+    EXPECT_EQ(table.Tabel.at(table.Tabel.at(table.Tabel.at(id_not_F).Low).High).High, 0);
+    //3, 7
+    EXPECT_EQ(table.Tabel.at(table.Tabel.at(table.Tabel.at(id_not_F).Low).High).Low, 1);
+    //9, 10
+    EXPECT_EQ(table.Tabel.at(table.Tabel.at(table.Tabel.at(id_not_F).High).Low).Low, 1);
+    //11
+    EXPECT_EQ(table.Tabel.at(table.Tabel.at(table.Tabel.at(table.Tabel.at(id_not_F).High).Low).High).Low, 1);
+    //12
+    EXPECT_EQ(table.Tabel.at(table.Tabel.at(table.Tabel.at(table.Tabel.at(id_not_F).High).Low).High).High, 0);
+    table.printTable();
+}
+
 TEST_F(ManagerFixture, FalseTest)
 {
     auto false_id = manager.False();
