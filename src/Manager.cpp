@@ -217,7 +217,7 @@ void Manager::findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root)
         
         nodes_of_root.insert( root );
 
-        nodes_of_root.insert( Tabel.at(root).TopVar );
+        //nodes_of_root.insert( Tabel.at(root).TopVar );
 
         findNodes( Tabel.at(root).High, nodes_of_root);
 

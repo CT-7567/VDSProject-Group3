@@ -490,9 +490,9 @@ TEST_F(ManagerFixture, findNodesTest)
     manager.findNodes(a_and_b, allNodesOf_a_and_b);
 
 
-    EXPECT_EQ( allNodesOf_a_and_b.size(), 5);
+    EXPECT_EQ( allNodesOf_a_and_b.size(), 4);
     EXPECT_EQ( allNodesOf_a_and_b.count( a_and_b ), 1);
-    EXPECT_EQ( allNodesOf_a_and_b.count( var_a ), 1);
+    EXPECT_EQ( allNodesOf_a_and_b.count( var_a ), 0);
     EXPECT_EQ( allNodesOf_a_and_b.count( var_b ), 1);
     EXPECT_EQ( allNodesOf_a_and_b.count( manager.True() ), 1);
     EXPECT_EQ( allNodesOf_a_and_b.count( manager.False() ), 1);
@@ -503,11 +503,11 @@ TEST_F(ManagerFixture, findNodesTest)
     manager.findNodes(function, allNodesOfF);    
 
 
-    EXPECT_EQ( allNodesOfF.size(), 9);
+    EXPECT_EQ( allNodesOfF.size(), 6);
     EXPECT_EQ( allNodesOfF.count( 9 ), 1);
     EXPECT_EQ( allNodesOfF.count( 8 ), 1);
     EXPECT_EQ( allNodesOfF.count( 7 ), 1);
-    EXPECT_EQ( allNodesOfF.count( var_a ), 1);
+    EXPECT_EQ( allNodesOfF.count( var_a ), 0);
     EXPECT_EQ( allNodesOfF.count( manager.True() ), 1);
 
 
