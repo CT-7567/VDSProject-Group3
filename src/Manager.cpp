@@ -31,7 +31,7 @@ bool Manager::isConstant(BDD_ID f)
 
 bool Manager::isVariable(BDD_ID x)
 {
-    if( Tabel.at(x).Label.size() == 1 ){
+    if( ( Tabel.at(x).TopVar == x ) && ( x != TRUE_ID ) && ( x != FALSE_ID ) ){
         return true;
     }
     return false;
@@ -152,30 +152,6 @@ BDD_ID Manager::and2(BDD_ID a, BDD_ID b)
 
     return a_and_b;
 
-
-   /*
-    auto a_and_b = createVar(( "("+Tabel.at(a).Label+"*"+Tabel.at(b).Label+")" ));
-
-    auto TopA = topVar(a);
-    auto TopB = topVar(b);
-    BDD_ID Top;
-
-    if(TopA <= TopB)
-    {
-        Top = TopA;
-    }
-    else
-    {
-        Top = TopB;
-    }
-        
-    Tabel.at(a_and_b).TopVar = Top;
-
-    Tabel.at(a_and_b).High = ite( coFactorTrue(a, Top), coFactorTrue(b, Top), coFactorTrue(FALSE_ID, Top) );
-    Tabel.at(a_and_b).Low = ite( coFactorFalse(a, Top), coFactorFalse(b, Top), coFactorFalse(FALSE_ID, Top) );
-
-    return a_and_b;
-    */
 }
 
 BDD_ID Manager::or2(BDD_ID a, BDD_ID b)
@@ -187,31 +163,6 @@ BDD_ID Manager::or2(BDD_ID a, BDD_ID b)
 
     return a_or_b;
 
-
-/*
-    auto a_or_b = createVar(( "("+Tabel.at(a).Label+"+"+Tabel.at(b).Label+")" ));
-
-    auto TopA = topVar(a);
-    auto TopB = topVar(b);
-    BDD_ID Top;
-
-    if(TopA <= TopB)
-    {
-        Top = TopA;
-    }
-    else
-    {
-        Top = TopB;
-    }
-        
-    Tabel.at(a_or_b).TopVar = Top;
-
-
-    Tabel.at(a_or_b).High = ite( coFactorTrue(a, Top), coFactorTrue(TRUE_ID, Top), coFactorTrue(b, Top) );
-    Tabel.at(a_or_b).Low = ite( coFactorFalse(a, Top), coFactorFalse(TRUE_ID, Top), coFactorFalse(b, Top) );
-
-    return a_or_b;
-    */
 }
 
 BDD_ID Manager::xor2(BDD_ID a, BDD_ID b)
@@ -261,14 +212,21 @@ std::string Manager::getTopVarName(const BDD_ID &root)
 void Manager::findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root)
 {
 
-    if( !isVariable(root) && !isConstant(root) )
+    if( !isConstant(root) )
     {
         
         nodes_of_root.insert( root );
 
+        nodes_of_root.insert( Tabel.at(root).TopVar );
+
         findNodes( Tabel.at(root).High, nodes_of_root);
 
         findNodes( Tabel.at(root).Low, nodes_of_root);
+    
+    }else{
+
+        nodes_of_root.insert( root );
+
     }
 }
 
