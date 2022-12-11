@@ -6,19 +6,21 @@
 #define VDSPROJECT_MANAGER_H
 
 #include "ManagerInterface.h"
-#include <vector>
+
 #include <unordered_map>
+#include <vector>
 
 namespace ClassProject {
 
-class Manager:public ManagerInterface{
+class Manager : public ManagerInterface
+{
 
     static constexpr BDD_ID FALSE_ID = 0;
     static constexpr BDD_ID TRUE_ID = 1;
 
-    public:
-
-    struct Node { 
+public:
+    struct Node
+    {
 
         BDD_ID High;
         BDD_ID Low;
@@ -26,13 +28,12 @@ class Manager:public ManagerInterface{
         std::string Label;
     };
 
+    std::unordered_map<BDD_ID, Node> Table;
 
-    std::unordered_map <BDD_ID, Node> Table;
-
-    Manager(){
-        Table.insert( { 0, Node{ 0, 0, 0, "False" } } );
-
-        Table.insert( { 1, Node{ 1, 1, 1, "True" } } );
+    Manager()
+    {
+        Table.insert({0, Node{0, 0, 0, "False"}});
+        Table.insert({1, Node{1, 1, 1, "True"}});
     }
 
     BDD_ID createVar(const std::string &label) override;
