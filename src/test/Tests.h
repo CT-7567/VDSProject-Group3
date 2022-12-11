@@ -76,8 +76,8 @@ TEST(ite, OR_Case)
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID idB = table.createVar("b");
-    EXPECT_EQ(table.Tabel.at(table.ite(idA,table.True(),idB)).Low, idB);
-    EXPECT_EQ(table.Tabel.at(table.ite(idA,table.True(),idB)).High, 1);
+    EXPECT_EQ(table.Table.at(table.ite(idA,table.True(),idB)).Low, idB);
+    EXPECT_EQ(table.Table.at(table.ite(idA,table.True(),idB)).High, 1);
 
     table.printTable();
 
@@ -88,8 +88,8 @@ TEST(ite, AND_Case) {
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID idB = table.createVar("b");
     ClassProject::BDD_ID x = table.ite(idA, idB, 0);
-    EXPECT_EQ(table.Tabel.at(x).Low, 0);
-    EXPECT_EQ(table.Tabel.at(x).High, idB);
+    EXPECT_EQ(table.Table.at(x).Low, 0);
+    EXPECT_EQ(table.Table.at(x).High, idB);
 
 
     table.printTable();
@@ -108,8 +108,8 @@ TEST(neg, simpleCase)
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID test = table.neg(idA);
-    EXPECT_EQ(table.Tabel.at(test).Low, 1);
-    EXPECT_EQ(table.Tabel.at(test).High, 0);
+    EXPECT_EQ(table.Table.at(test).Low, 1);
+    EXPECT_EQ(table.Table.at(test).High, 0);
     //two times neg should be the original
     EXPECT_EQ(table.neg(test), idA);
 }
@@ -120,20 +120,20 @@ TEST(neg, complexCase)
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID idB = table.createVar("b");
     ClassProject::BDD_ID idAn = table.createVar("an");
-    table.Tabel.at(idAn).Low = 1;
-    table.Tabel.at(idAn).High = 0;
+    table.Table.at(idAn).Low = 1;
+    table.Table.at(idAn).High = 0;
     ClassProject::BDD_ID idBn = table.createVar("bn");
-    table.Tabel.at(idBn).Low = 1;
-    table.Tabel.at(idBn).High = 0;
+    table.Table.at(idBn).Low = 1;
+    table.Table.at(idBn).High = 0;
     ClassProject::BDD_ID or_id = table.ite(idA, 1, idB);
     ClassProject::BDD_ID or_not_id = table.neg(or_id);
     std::cout<<"ID or not : "<<  or_not_id << std::endl;
-    EXPECT_EQ(table.Tabel.at(or_not_id).High, 0);
-    ClassProject::BDD_ID idB_not = table.Tabel.at(or_not_id).Low;
+    EXPECT_EQ(table.Table.at(or_not_id).High, 0);
+    ClassProject::BDD_ID idB_not = table.Table.at(or_not_id).Low;
     std::cout<<"ID b not : "<<  idB_not << std::endl;
-    EXPECT_EQ(table.Tabel.at(or_not_id).Low, idB_not);
-    EXPECT_EQ(table.Tabel.at(idB_not).Low, 1);
-    EXPECT_EQ(table.Tabel.at(idB_not).High, 0);
+    EXPECT_EQ(table.Table.at(or_not_id).Low, idB_not);
+    EXPECT_EQ(table.Table.at(idB_not).Low, 1);
+    EXPECT_EQ(table.Table.at(idB_not).High, 0);
     table.printTable();
 }
 
@@ -196,19 +196,19 @@ TEST(neg, withFunction){
      * 16:  1   1   1   1   |0
      */
     //13,14,15,16
-    EXPECT_EQ(table.Tabel.at(table.Tabel.at(id_not_F).High).High, 0);
+    EXPECT_EQ(table.Table.at(table.Table.at(id_not_F).High).High, 0);
     //1,2,5,6
-    EXPECT_EQ(table.Tabel.at(table.Tabel.at(id_not_F).Low).Low, 1);
+    EXPECT_EQ(table.Table.at(table.Table.at(id_not_F).Low).Low, 1);
     //4,8
-    EXPECT_EQ(table.Tabel.at(table.Tabel.at(table.Tabel.at(id_not_F).Low).High).High, 0);
+    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(id_not_F).Low).High).High, 0);
     //3, 7
-    EXPECT_EQ(table.Tabel.at(table.Tabel.at(table.Tabel.at(id_not_F).Low).High).Low, 1);
+    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(id_not_F).Low).High).Low, 1);
     //9, 10
-    EXPECT_EQ(table.Tabel.at(table.Tabel.at(table.Tabel.at(id_not_F).High).Low).Low, 1);
+    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(id_not_F).High).Low).Low, 1);
     //11
-    EXPECT_EQ(table.Tabel.at(table.Tabel.at(table.Tabel.at(table.Tabel.at(id_not_F).High).Low).High).Low, 1);
+    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(table.Table.at(id_not_F).High).Low).High).Low, 1);
     //12
-    EXPECT_EQ(table.Tabel.at(table.Tabel.at(table.Tabel.at(table.Tabel.at(id_not_F).High).Low).High).High, 0);
+    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(table.Table.at(id_not_F).High).Low).High).High, 0);
     table.printTable();
 }
 
@@ -217,7 +217,7 @@ TEST_F(ManagerFixture, FalseTest)
     auto false_id = manager.False();
     EXPECT_EQ(false_id, 0);
 
-    auto false_node = manager.Tabel.at(false_id);
+    auto false_node = manager.Table.at(false_id);
     EXPECT_EQ(false_node.High, 0);
     EXPECT_EQ(false_node.Low, 0);
     EXPECT_EQ(false_node.TopVar, 0);
@@ -225,7 +225,7 @@ TEST_F(ManagerFixture, FalseTest)
 
 TEST_F(ManagerFixture, TopVarTest)
 {
-    for (auto const &[node_id, node] : manager.Tabel) {
+    for (auto const &[node_id, node] : manager.Table) {
         EXPECT_EQ(manager.topVar(node_id), node.TopVar);
     }
 
@@ -282,7 +282,7 @@ TEST_F(ManagerFixture, TrueTest)
     auto true_id = manager.True();
     EXPECT_EQ(true_id, 1);
 
-    auto true_node = manager.Tabel.at(true_id);
+    auto true_node = manager.Table.at(true_id);
     EXPECT_EQ(true_node.High, 1);
     EXPECT_EQ(true_node.Low, 1);
     EXPECT_EQ(true_node.TopVar, 1);
@@ -324,7 +324,7 @@ TEST_F(ManagerFixture, TopVarNameTest)
 TEST_F(ManagerFixture, OrTest)
 { 
     auto a_or_b = manager.or2(var_a, var_b);
-    auto A_or_B = manager.Tabel.at(a_or_b);
+    auto A_or_B = manager.Table.at(a_or_b);
 
     EXPECT_EQ( A_or_B.Label , "(a+b)");
     EXPECT_EQ( A_or_B.High, manager.True() );
@@ -338,7 +338,7 @@ TEST_F(ManagerFixture, OrTest)
 TEST_F(ManagerFixture, AndTest)
 { 
     auto a_and_b = manager.and2(var_a, var_b);
-    auto A_and_B = manager.Tabel.at(a_and_b);
+    auto A_and_B = manager.Table.at(a_and_b);
 
     EXPECT_EQ( A_and_B.Label , "(a*b)");
     EXPECT_EQ( A_and_B.High, var_b);
@@ -383,7 +383,7 @@ TEST_F(ManagerFixture, CoFacTrueTest)
 TEST_F(ManagerFixture, XorTest)
 { 
     auto a_xor_b = manager.xor2(var_a, var_b);
-    auto A_xor_B = manager.Tabel.at(a_xor_b);
+    auto A_xor_B = manager.Table.at(a_xor_b);
 
     EXPECT_EQ( A_xor_B.Label , "(a⊕b)");
 
@@ -391,7 +391,7 @@ TEST_F(ManagerFixture, XorTest)
     EXPECT_EQ( A_xor_B.TopVar, var_a);
 
     auto bnot = A_xor_B.High;
-    auto Bnot = manager.Tabel.at(bnot);
+    auto Bnot = manager.Table.at(bnot);
 
     EXPECT_EQ( Bnot.High, manager.False() );   
     EXPECT_EQ( Bnot.Low, manager.True() );
@@ -404,13 +404,13 @@ TEST_F(ManagerFixture, XorTest)
 TEST_F(ManagerFixture, NandTest)
 { 
     auto a_nand_b = manager.nand2(var_a, var_b);
-    auto A_nand_B = manager.Tabel.at(a_nand_b);
+    auto A_nand_B = manager.Table.at(a_nand_b);
 
     EXPECT_EQ( A_nand_B.Low, manager.True());
     EXPECT_EQ( A_nand_B.TopVar, var_a);
 
     auto bnot = A_nand_B.High;
-    auto Bnot = manager.Tabel.at(bnot);
+    auto Bnot = manager.Table.at(bnot);
 
     EXPECT_EQ( Bnot.High, manager.False() );   
     EXPECT_EQ( Bnot.Low, manager.True() );
@@ -422,13 +422,13 @@ TEST_F(ManagerFixture, NandTest)
 TEST_F(ManagerFixture, NorTest)
 { 
     auto a_nor_b = manager.nor2(var_a, var_b);
-    auto A_nor_B = manager.Tabel.at(a_nor_b);
+    auto A_nor_B = manager.Table.at(a_nor_b);
 
     EXPECT_EQ( A_nor_B.High, manager.False());
     EXPECT_EQ( A_nor_B.TopVar, var_a);
 
     auto bnot = A_nor_B.Low;
-    auto Bnot = manager.Tabel.at(bnot);
+    auto Bnot = manager.Table.at(bnot);
 
     EXPECT_EQ( Bnot.High, manager.False() );   
     EXPECT_EQ( Bnot.Low, manager.True() );
@@ -440,13 +440,13 @@ TEST_F(ManagerFixture, NorTest)
 TEST_F(ManagerFixture, XnorTest)
 { 
     auto a_xnor_b = manager.xnor2(var_a, var_b);
-    auto A_xnor_B = manager.Tabel.at(a_xnor_b);
+    auto A_xnor_B = manager.Table.at(a_xnor_b);
 
     EXPECT_EQ( A_xnor_B.High, var_b);
     EXPECT_EQ( A_xnor_B.TopVar, var_a);
 
     auto bnot = A_xnor_B.Low;
-    auto Bnot = manager.Tabel.at(bnot);
+    auto Bnot = manager.Table.at(bnot);
 
     EXPECT_EQ( Bnot.High, manager.False() );   
     EXPECT_EQ( Bnot.Low, manager.True() );
@@ -455,13 +455,13 @@ TEST_F(ManagerFixture, XnorTest)
     auto c_and_d = manager.and2( var_d, var_c );
 
     auto a_xnor_c_and_d = manager.xnor2(var_a, c_and_d);
-    auto A_xnor_c_and_d = manager.Tabel.at(a_xnor_c_and_d);
+    auto A_xnor_c_and_d = manager.Table.at(a_xnor_c_and_d);
 
     auto c_and_dT = A_xnor_c_and_d.High;
-    auto C_and_D = manager.Tabel.at(c_and_d);
+    auto C_and_D = manager.Table.at(c_and_d);
 
     auto c_and_dT_not = A_xnor_c_and_d.Low;
-    auto C_and_D_not = manager.Tabel.at(c_and_dT_not);
+    auto C_and_D_not = manager.Table.at(c_and_dT_not);
 
     EXPECT_EQ( c_and_d, c_and_dT );
 
@@ -471,7 +471,7 @@ TEST_F(ManagerFixture, XnorTest)
 
 
     auto c_nand_d = manager.nand2( var_d, var_c );
-    auto C_nand_D = manager.Tabel.at(c_nand_d);
+    auto C_nand_D = manager.Table.at(c_nand_d);
 
     EXPECT_EQ( C_and_D_not.TopVar, C_nand_D.TopVar );
     EXPECT_EQ( C_and_D_not.Low, C_nand_D.Low );
@@ -538,7 +538,7 @@ TEST_F(ManagerFixture, findVarsTest)
 
     std::cout<<"Var of a*b: "<<std::endl;
     for(auto item : allVarsOf_a_and_b )
-        std::cout<< "ID: "<<item<<"     | Label: " <<manager.Tabel.at(item).Label<<"\n\n" << std::endl;
+        std::cout<< "ID: "<<item<<"     | Label: " <<manager.Table.at(item).Label<<"\n\n" << std::endl;
 
 
     manager.findVars(function, allVarsOfF);    
@@ -555,7 +555,7 @@ TEST_F(ManagerFixture, findVarsTest)
 
     std::cout<<"Var of fkt: "<<std::endl;
     for(auto item : allVarsOfF )
-        std::cout<< "ID: "<<item<<"     | Label: " <<manager.Tabel.at(item).Label<<"\n\n" << std::endl;
+        std::cout<< "ID: "<<item<<"     | Label: " <<manager.Table.at(item).Label<<"\n\n" << std::endl;
     manager.printTable();
 
 }
