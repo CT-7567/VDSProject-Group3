@@ -30,6 +30,56 @@ public:
 
     std::unordered_map<BDD_ID, Node> Table;
 
+    struct ComputedTableEntry
+    {
+        BDD_ID f;
+        BDD_ID g;
+        BDD_ID h;
+
+        bool operator==(const ComputedTableEntry &other) const
+        {
+            return (f == other.f && g == other.g && h == other.h);
+        }
+    };
+
+    struct ComputedTableEntryHasher
+    {
+        std::size_t operator()(const ComputedTableEntry &k) const
+        {
+            using std::hash;
+            using std::size_t;
+
+            return ((hash<BDD_ID>()(k.f) ^ (hash<BDD_ID>()(k.g) << 1)) >> 1) ^ (hash<BDD_ID>()(k.h) << 1);
+        }
+    };
+
+    std::unordered_map<ComputedTableEntry, BDD_ID, ComputedTableEntryHasher> ComputedTable;
+
+    struct SubGraphTableEntry
+    {
+        BDD_ID topVar;
+        BDD_ID low;
+        BDD_ID high;
+
+        bool operator==(const SubGraphTableEntry &other) const
+        {
+            return (topVar == other.topVar && low == other.low && high == other.high);
+        }
+    };
+
+    struct SubGraphTableEntryHasher
+    {
+        std::size_t operator()(const SubGraphTableEntry &k) const
+        {
+            using std::hash;
+            using std::size_t;
+
+            return ((hash<BDD_ID>()(k.topVar) ^ (hash<BDD_ID>()(k.low) << 1)) >> 1) ^ (hash<BDD_ID>()(k.high) << 1);
+        }
+    };
+
+    std::unordered_map<SubGraphTableEntry, BDD_ID, SubGraphTableEntryHasher> SubGraphTable;
+
     Manager()
     {
         Table.insert({0, Node{0, 0, 0, "False"}});

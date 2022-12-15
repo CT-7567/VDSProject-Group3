@@ -2,3 +2,4 @@ gtest/
 build/
 .cache
 .vscode
+results

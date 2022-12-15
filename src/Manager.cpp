@@ -2,6 +2,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <algorithm>
 
 namespace ClassProject {
 
@@ -9,6 +10,9 @@ BDD_ID Manager::createVar(const std::string &label)
 {
     BDD_ID newID = Table.size();
     Table.insert({newID, Node{1, 0, newID, label}});
+
+    SubGraphTable.emplace(SubGraphTableEntry{newID, 0, 1}, newID);
+
     return newID;
 }
 
@@ -51,6 +55,12 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
         } else
             return e;
     }
+
+    if (ComputedTable.find({i, t, e}) != ComputedTable.end())
+    {
+        return ComputedTable.at({i, t, e});
+    }
+
     BDD_ID rHigh, rLow, x;
     auto TopA = topVar(i);
     auto TopB = topVar(t);
@@ -72,25 +82,27 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
         return rHigh;
     }
 
-    for (int j = 0; j < Table.size(); j++) {
-        if (Table.at(j).TopVar == x and Table.at(j).Low == rLow and Table.at(j).High == rHigh) {
-            return j;
-        }
-    }
+    if (SubGraphTable.find({x, rLow, rHigh}) != SubGraphTable.end())
+        return SubGraphTable.at({x, rLow, rHigh});
+
     BDD_ID newID = Table.size();
     std::string new_label = "test";
-    if (rHigh == TRUE_ID) {
-        new_label = "(" + Table.at(Table.at(x).TopVar).Label + "+" + Table.at(rLow).Label + ")";
-    } else if (rHigh == FALSE_ID and rLow == TRUE_ID) {
-        new_label = "~" + Table.at(Table.at(x).TopVar).Label;
-    } else if (rLow == TRUE_ID) {
-        new_label = "(~" + Table.at(Table.at(x).TopVar).Label + +"+" + Table.at(rHigh).Label + ")";
-    } else if (rHigh == FALSE_ID) {
-        new_label = "(~" + Table.at(Table.at(x).TopVar).Label + "*" + Table.at(rLow).Label + ")";
-    } else if (rLow == FALSE_ID) {
-        new_label = "(" + Table.at(Table.at(x).TopVar).Label + "*" + Table.at(rHigh).Label + ")";
-    }
+    // if (rHigh == TRUE_ID) {
+    //     new_label = "(" + Table.at(Table.at(x).TopVar).Label + "+" + Table.at(rLow).Label + ")";
+    // } else if (rHigh == FALSE_ID and rLow == TRUE_ID) {
+    //     new_label = "~" + Table.at(Table.at(x).TopVar).Label;
+    // } else if (rLow == TRUE_ID) {
+    //     new_label = "(~" + Table.at(Table.at(x).TopVar).Label + +"+" + Table.at(rHigh).Label + ")";
+    // } else if (rHigh == FALSE_ID) {
+    //     new_label = "(~" + Table.at(Table.at(x).TopVar).Label + "*" + Table.at(rLow).Label + ")";
+    // } else if (rLow == FALSE_ID) {
+    //     new_label = "(" + Table.at(Table.at(x).TopVar).Label + "*" + Table.at(rHigh).Label + ")";
+    // }
     Table.insert({newID, {rHigh, rLow, x, new_label}});
+
+    ComputedTable.emplace(ComputedTableEntry{i, t, e}, newID);
+    SubGraphTable.emplace(SubGraphTableEntry{x, rLow, rHigh}, newID);
+
     return newID;
 }
 
@@ -141,7 +153,7 @@ BDD_ID Manager::coFactorFalse(BDD_ID f)
 BDD_ID Manager::neg(BDD_ID a)
 {
     BDD_ID temp = ite(a, 0, 1);
-    Table.at(temp).Label = "~" + Table.at(a).Label;
+    // Table.at(temp).Label = "~" + Table.at(a).Label;
     return temp;
 }
 
@@ -150,7 +162,7 @@ BDD_ID Manager::and2(BDD_ID a, BDD_ID b)
 
     auto a_and_b = ite(a, b, FALSE_ID);
 
-    Table.at(a_and_b).Label = "(" + Table.at(a).Label + "*" + Table.at(b).Label + ")";
+    // Table.at(a_and_b).Label = "(" + Table.at(a).Label + "*" + Table.at(b).Label + ")";
 
     return a_and_b;
 }
@@ -160,7 +172,7 @@ BDD_ID Manager::or2(BDD_ID a, BDD_ID b)
 
     auto a_or_b = ite(a, TRUE_ID, b);
 
-    Table.at(a_or_b).Label = "(" + Table.at(a).Label + "+" + Table.at(b).Label + ")";
+    // Table.at(a_or_b).Label = "(" + Table.at(a).Label + "+" + Table.at(b).Label + ")";
 
     return a_or_b;
 }
@@ -168,27 +180,27 @@ BDD_ID Manager::or2(BDD_ID a, BDD_ID b)
 BDD_ID Manager::xor2(BDD_ID a, BDD_ID b)
 {
 
-    auto a_xor_b = or2(and2(neg(a), b), and2(a, neg(b)));
+    auto a_xor_b = ite(a, neg(b), b);
 
-    Table.at(a_xor_b).Label = "(" + Table.at(a).Label + "⊕" + Table.at(b).Label + ")";
+    // Table.at(a_xor_b).Label = "(" + Table.at(a).Label + "⊕" + Table.at(b).Label + ")";
 
     return a_xor_b;
 }
 
 BDD_ID Manager::nand2(BDD_ID a, BDD_ID b)
 {
-    auto a_nand_b = neg(and2(a, b));
+    auto a_nand_b = ite(a, neg(b), TRUE_ID);
 
-    Table.at(a_nand_b).Label = "~(" + Table.at(a).Label + "*" + Table.at(b).Label + ")";
+    // Table.at(a_nand_b).Label = "~(" + Table.at(a).Label + "*" + Table.at(b).Label + ")";
 
     return a_nand_b;
 }
 
 BDD_ID Manager::nor2(BDD_ID a, BDD_ID b)
 {
-    auto a_nor_b = neg(or2(a, b));
+    auto a_nor_b = ite(a, FALSE_ID, neg(b));
 
-    Table.at(a_nor_b).Label = "~(" + Table.at(a).Label + "+" + Table.at(b).Label + ")";
+    // Table.at(a_nor_b).Label = "~(" + Table.at(a).Label + "+" + Table.at(b).Label + ")";
 
     return a_nor_b;
 }
@@ -196,9 +208,9 @@ BDD_ID Manager::nor2(BDD_ID a, BDD_ID b)
 BDD_ID Manager::xnor2(BDD_ID a, BDD_ID b)
 {
 
-    auto a_xnor_b = neg(xor2(a, b));
+    auto a_xnor_b = ite(a, b, neg(b));
 
-    Table.at(a_xnor_b).Label = "~(" + Table.at(a).Label + "⊕" + Table.at(b).Label + ")";
+    // Table.at(a_xnor_b).Label = "~(" + Table.at(a).Label + "⊕" + Table.at(b).Label + ")";
 
     return a_xnor_b;
 }
