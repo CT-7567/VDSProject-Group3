@@ -14,11 +14,10 @@ namespace ClassProject {
 
 class Manager : public ManagerInterface
 {
-
+private:
     static constexpr BDD_ID FALSE_ID = 0;
     static constexpr BDD_ID TRUE_ID = 1;
 
-public:
     struct Node
     {
 
@@ -80,6 +79,7 @@ public:
 
     std::unordered_map<SubGraphTableEntry, BDD_ID, SubGraphTableEntryHasher> SubGraphTable;
 
+public:
     Manager()
     {
         Table.insert({0, Node{0, 0, 0, "False"}});
