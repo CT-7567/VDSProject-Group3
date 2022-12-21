@@ -217,19 +217,10 @@ TEST_F(ManagerFixture, FalseTest)
 {
     auto false_id = manager.False();
     EXPECT_EQ(false_id, 0);
-
-    auto false_node = manager.Table.at(false_id);
-    EXPECT_EQ(false_node.High, 0);
-    EXPECT_EQ(false_node.Low, 0);
-    EXPECT_EQ(false_node.TopVar, 0);
 }
 
 TEST_F(ManagerFixture, TopVarTest)
 {
-    for (auto const &[node_id, node] : manager.Table) {
-        EXPECT_EQ(manager.topVar(node_id), node.TopVar);
-    }
-
     EXPECT_EQ(manager.topVar(var_a), var_a);
     EXPECT_EQ(manager.topVar(var_b), var_b);
     EXPECT_EQ(manager.topVar(var_c), var_c);
