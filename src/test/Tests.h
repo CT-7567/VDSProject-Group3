@@ -253,10 +253,6 @@ TEST_F(ManagerFixture, TrueTest)
     auto true_id = manager.True();
     EXPECT_EQ(true_id, 1);
 
-    auto true_node = manager.Table.at(true_id);
-    EXPECT_EQ(true_node.High, 1);
-    EXPECT_EQ(true_node.Low, 1);
-    EXPECT_EQ(true_node.TopVar, 1);
 }
 
 TEST_F(ManagerFixture, isVarTest)
@@ -293,12 +289,11 @@ TEST_F(ManagerFixture, TopVarNameTest)
 TEST_F(ManagerFixture, OrTest)
 {
     auto a_or_b = manager.or2(var_a, var_b);
-    auto A_or_B = manager.Table.at(a_or_b);
-
-    // EXPECT_EQ(A_or_B.Label, "(a+b)");
-    EXPECT_EQ(A_or_B.High, manager.True());
-    EXPECT_EQ(A_or_B.Low, var_b);
-    EXPECT_EQ(A_or_B.TopVar, var_a);
+    
+    auto A_or_B = manager.ite(var_a, manager.True(), var_b);
+    
+    EXPECT_EQ(A_or_B, a_or_b);
+    
 
     manager.printTable();
 }
@@ -306,12 +301,11 @@ TEST_F(ManagerFixture, OrTest)
 TEST_F(ManagerFixture, AndTest)
 {
     auto a_and_b = manager.and2(var_a, var_b);
-    auto A_and_B = manager.Table.at(a_and_b);
 
-    // EXPECT_EQ(A_and_B.Label, "(a*b)");
-    EXPECT_EQ(A_and_B.High, var_b);
-    EXPECT_EQ(A_and_B.Low, manager.False());
-    EXPECT_EQ(A_and_B.TopVar, var_a);
+    auto A_and_B = manager.ite(var_a, var_b, manager.False() );
+
+    EXPECT_EQ(A_and_B, a_and_b);
+
 
     manager.printTable();
 }
@@ -345,98 +339,41 @@ TEST_F(ManagerFixture, CoFacTrueTest)
 TEST_F(ManagerFixture, XorTest)
 {
     auto a_xor_b = manager.xor2(var_a, var_b);
-    auto A_xor_B = manager.Table.at(a_xor_b);
+    
+    auto A_xor_B = manager.ite(var_a, manager.neg(var_b), var_b);
 
-    // EXPECT_EQ(A_xor_B.Label, "(a⊕b)");
+    EXPECT_EQ(A_xor_B, a_xor_b)
 
-    EXPECT_EQ(A_xor_B.Low, var_b);
-    EXPECT_EQ(A_xor_B.TopVar, var_a);
-
-    auto bnot = A_xor_B.High;
-    auto Bnot = manager.Table.at(bnot);
-
-    EXPECT_EQ(Bnot.High, manager.False());
-    EXPECT_EQ(Bnot.Low, manager.True());
-    EXPECT_EQ(Bnot.TopVar, var_b);
-
-    manager.printTable();
 }
 
 TEST_F(ManagerFixture, NandTest)
 {
     auto a_nand_b = manager.nand2(var_a, var_b);
-    auto A_nand_B = manager.Table.at(a_nand_b);
+    
+    auto A_nand_B = manager.ite(var_a, manager.neg(var_b), manager.True() );
 
-    EXPECT_EQ(A_nand_B.Low, manager.True());
-    EXPECT_EQ(A_nand_B.TopVar, var_a);
+    EXPECT_EQ(A_nand_B, a_nand_b)
 
-    auto bnot = A_nand_B.High;
-    auto Bnot = manager.Table.at(bnot);
-
-    EXPECT_EQ(Bnot.High, manager.False());
-    EXPECT_EQ(Bnot.Low, manager.True());
-    EXPECT_EQ(Bnot.TopVar, var_b);
-
-    manager.printTable();
 }
 
 TEST_F(ManagerFixture, NorTest)
 {
     auto a_nor_b = manager.nor2(var_a, var_b);
-    auto A_nor_B = manager.Table.at(a_nor_b);
+    
+    auto A_nor_B = manager.ite(var_a, manager.False(), manager.neg(var_b) );
 
-    EXPECT_EQ(A_nor_B.High, manager.False());
-    EXPECT_EQ(A_nor_B.TopVar, var_a);
-
-    auto bnot = A_nor_B.Low;
-    auto Bnot = manager.Table.at(bnot);
-
-    EXPECT_EQ(Bnot.High, manager.False());
-    EXPECT_EQ(Bnot.Low, manager.True());
-    EXPECT_EQ(Bnot.TopVar, var_b);
-
-    manager.printTable();
+    EXPECT_EQ(A_nor_B, a_nor_b)  
+    
 }
 
 TEST_F(ManagerFixture, XnorTest)
 {
     auto a_xnor_b = manager.xnor2(var_a, var_b);
-    auto A_xnor_B = manager.Table.at(a_xnor_b);
+    
+    auto A_xnor_B = manager.ite(var_a, var_b, manager.neg(var_b) );
 
-    EXPECT_EQ(A_xnor_B.High, var_b);
-    EXPECT_EQ(A_xnor_B.TopVar, var_a);
-
-    auto bnot = A_xnor_B.Low;
-    auto Bnot = manager.Table.at(bnot);
-
-    EXPECT_EQ(Bnot.High, manager.False());
-    EXPECT_EQ(Bnot.Low, manager.True());
-    EXPECT_EQ(Bnot.TopVar, var_b);
-
-    auto c_and_d = manager.and2(var_d, var_c);
-
-    auto a_xnor_c_and_d = manager.xnor2(var_a, c_and_d);
-    auto A_xnor_c_and_d = manager.Table.at(a_xnor_c_and_d);
-
-    auto c_and_dT = A_xnor_c_and_d.High;
-    auto C_and_D = manager.Table.at(c_and_d);
-
-    auto c_and_dT_not = A_xnor_c_and_d.Low;
-    auto C_and_D_not = manager.Table.at(c_and_dT_not);
-
-    EXPECT_EQ(c_and_d, c_and_dT);
-
-    EXPECT_EQ(C_and_D_not.TopVar, var_c);
-    // EXPECT_EQ(C_and_D_not.High, 16); // 16 = notD
-    EXPECT_EQ(C_and_D_not.Low, manager.True());
-
-    auto c_nand_d = manager.nand2(var_d, var_c);
-    auto C_nand_D = manager.Table.at(c_nand_d);
-
-    EXPECT_EQ(C_and_D_not.TopVar, C_nand_D.TopVar);
-    EXPECT_EQ(C_and_D_not.Low, C_nand_D.Low);
-
-    manager.printTable();
+    EXPECT_EQ(A_xnor_B, a_xnor_b)  
+      
 }
 
 TEST_F(ManagerFixture, findNodesTest)
@@ -483,9 +420,6 @@ TEST_F(ManagerFixture, findVarsTest)
     EXPECT_EQ(allVarsOf_a_and_b.count(manager.True()), 0);
     EXPECT_EQ(allVarsOf_a_and_b.count(manager.False()), 0);
 
-    std::cout << "Var of a*b: " << std::endl;
-    for (auto item : allVarsOf_a_and_b)
-        std::cout << "ID: " << item << "     | Label: " << manager.Table.at(item).Label << "\n\n" << std::endl;
 
     manager.findVars(function, allVarsOfF);
 
@@ -499,9 +433,7 @@ TEST_F(ManagerFixture, findVarsTest)
     EXPECT_EQ(allVarsOfF.count(var_d), 1);
     EXPECT_EQ(allVarsOfF.count(manager.True()), 0);
 
-    std::cout << "Var of fkt: " << std::endl;
-    for (auto item : allVarsOfF)
-        std::cout << "ID: " << item << "     | Label: " << manager.Table.at(item).Label << "\n\n" << std::endl;
+
     manager.printTable();
 }
 
