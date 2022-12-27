@@ -453,4 +453,55 @@ TEST_F(ManagerFixture, UniqueTableSizeTest)
     EXPECT_EQ(manager.uniqueTableSize(), table_size);
 }
 
+
+
+
+TEST(DrawNegGraphs, simpleCase)
+{
+    ClassProject::Manager table = ClassProject::Manager();
+    
+    auto var_A = table.createVar("a");
+    auto var_B = table.createVar("b");
+    auto var_C = table.createVar("c");
+    auto var_D = table.createVar("d");
+
+
+    auto all_XOR = table.and2( table.and2( var_A, var_B ), table.and2( var_C, var_D ) );
+
+    auto all_NXOR = table.neg( table.and2( table.and2( var_A, var_B ), table.and2( var_C, var_D ) ) );
+
+
+
+    table.printTable();
+
+
+    EXPECT_EQ(1, 0);
+}
+
+
+
+TEST(DrawNegGraphs2, simpleCase)
+{
+    ClassProject::Manager table = ClassProject::Manager();
+    
+    auto var_A = table.createVar("a");
+    auto var_B = table.createVar("b");
+    auto var_C = table.createVar("c");
+    auto var_D = table.createVar("d");
+
+
+    auto all_XOR = table.or2( table.or2( var_A, var_B ), table.or2( var_C, var_D ) );
+
+    auto all_NXOR = table.neg( table.or2( table.or2( var_A, var_B ), table.or2( var_C, var_D ) ) );
+
+
+
+    table.printTable();
+
+
+    EXPECT_EQ(1, 0);
+}
+
+
+
 #endif
