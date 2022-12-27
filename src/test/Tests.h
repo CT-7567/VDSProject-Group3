@@ -77,8 +77,9 @@ TEST(ite, OR_Case)
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID idB = table.createVar("b");
-    EXPECT_EQ(table.Table.at(table.ite(idA, table.True(), idB)).Low, idB);
-    EXPECT_EQ(table.Table.at(table.ite(idA, table.True(), idB)).High, 1);
+    ClassProject::BDD_ID a_or_b = table.ite(idA, 1, idB);
+    EXPECT_EQ(table.coFactorTrue(a_or_b), table.True());
+    EXPECT_EQ(table.coFactorFalse(a_or_b), idB);
 
     table.printTable();
 }
@@ -88,11 +89,21 @@ TEST(ite, AND_Case)
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID idB = table.createVar("b");
-    ClassProject::BDD_ID x = table.ite(idA, idB, 0);
-    EXPECT_EQ(table.Table.at(x).Low, 0);
-    EXPECT_EQ(table.Table.at(x).High, idB);
+    ClassProject::BDD_ID a_and_b = table.ite(idA, idB, 0);
+    EXPECT_EQ(table.coFactorTrue(a_and_b), idB);
+    EXPECT_EQ(table.coFactorFalse(a_and_b), table.False());
 
     table.printTable();
+}
+
+TEST(ite, node_exist_already)
+{
+    ClassProject::Manager table = ClassProject::Manager();
+    ClassProject::BDD_ID idA = table.createVar("a");
+    ClassProject::BDD_ID idB = table.createVar("b");
+    ClassProject::BDD_ID a_and_b = table.ite(idA, idB, 0);
+    ClassProject::BDD_ID a_and_b2 = table.ite(idA, idB, 0);
+    EXPECT_EQ(a_and_b, a_and_b2);
 }
 
 TEST(neg, terminalCase)
@@ -107,38 +118,13 @@ TEST(neg, simpleCase)
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID test = table.neg(idA);
-    EXPECT_EQ(table.Table.at(test).Low, 1);
-    EXPECT_EQ(table.Table.at(test).High, 0);
+    EXPECT_EQ(table.coFactorFalse(idA), table.coFactorTrue(test));
+    EXPECT_EQ(table.coFactorTrue(idA), table.coFactorFalse(test));
     // two times neg should be the original
     EXPECT_EQ(table.neg(test), idA);
     table.printTable();
 }
-
-TEST(neg, complexCase)
-{
-    ClassProject::Manager table = ClassProject::Manager();
-    ClassProject::BDD_ID idA = table.createVar("a");
-    ClassProject::BDD_ID idB = table.createVar("b");
-    ClassProject::BDD_ID idAn = table.createVar("an");
-    table.Table.at(idAn).Low = 1;
-    table.Table.at(idAn).High = 0;
-    ClassProject::BDD_ID idBn = table.createVar("bn");
-    table.Table.at(idBn).Low = 1;
-    table.Table.at(idBn).High = 0;
-    ClassProject::BDD_ID or_id = table.ite(idA, 1, idB);
-    ClassProject::BDD_ID or_not_id = table.neg(or_id);
-    std::cout << "ID or not : " << or_not_id << std::endl;
-    EXPECT_EQ(table.Table.at(or_not_id).High, 0);
-    ClassProject::BDD_ID idB_not = table.Table.at(or_not_id).Low;
-    std::cout << "ID b not : " << idB_not << std::endl;
-    EXPECT_EQ(table.Table.at(or_not_id).Low, idB_not);
-    EXPECT_EQ(table.Table.at(idB_not).Low, 1);
-    EXPECT_EQ(table.Table.at(idB_not).High, 0);
-    table.printTable();
-}
-
-TEST(neg, withFunction)
-{
+TEST(neg, withFunction) {
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID idB = table.createVar("b");
@@ -196,22 +182,15 @@ TEST(neg, withFunction)
      *      a   b   c   d   |f
      * 16:  1   1   1   1   |0
      */
-    // 13,14,15,16
-    EXPECT_EQ(table.Table.at(table.Table.at(id_not_F).High).High, 0);
-    // 1,2,5,6
-    EXPECT_EQ(table.Table.at(table.Table.at(id_not_F).Low).Low, 1);
-    // 4,8
-    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(id_not_F).Low).High).High, 0);
-    // 3, 7
-    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(id_not_F).Low).High).Low, 1);
-    // 9, 10
-    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(id_not_F).High).Low).Low, 1);
-    // 11
-    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(table.Table.at(id_not_F).High).Low).High).Low, 1);
-    // 12
-    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(table.Table.at(id_not_F).High).Low).High).High, 0);
-    table.printTable();
+    EXPECT_EQ(table.coFactorTrue(table.coFactorTrue(table.coFactorTrue(table.coFactorTrue(id_not_F)))), table.False());
+    EXPECT_EQ(table.coFactorTrue(table.coFactorTrue(table.coFactorTrue(table.coFactorFalse(id_not_F)))), table.False());
+    EXPECT_EQ(table.coFactorTrue(table.coFactorTrue(table.coFactorFalse(table.coFactorTrue(id_not_F)))), table.False());
+    EXPECT_EQ(table.coFactorTrue(table.coFactorFalse(table.coFactorTrue(table.coFactorFalse(id_not_F)))), table.True());
+    EXPECT_EQ(table.coFactorTrue(table.coFactorFalse(table.coFactorFalse(table.coFactorTrue(id_not_F)))), table.True());
+    EXPECT_EQ(table.coFactorFalse(table.coFactorFalse(table.coFactorFalse(table.coFactorFalse(id_not_F)))), table.True());
 }
+
+
 
 TEST_F(ManagerFixture, FalseTest)
 {
