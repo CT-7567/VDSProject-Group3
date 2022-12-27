@@ -18,11 +18,19 @@ private:
     static constexpr BDD_ID FALSE_ID = 0;
     static constexpr BDD_ID TRUE_ID = 1;
 
+    struct LowEdge
+    {
+        bool complemented;
+        BDD_ID node;
+    };
+
     struct Node
     {
+        // Indicates that this is a complemented root node
+        bool complemented;
 
         BDD_ID High;
-        BDD_ID Low;
+        LowEdge Low;
         BDD_ID TopVar;
         std::string Label;
     };
@@ -79,11 +87,26 @@ private:
 
     std::unordered_map<SubGraphTableEntry, BDD_ID, SubGraphTableEntryHasher> SubGraphTable;
 
+    BDD_ID negativeReference(BDD_ID f) {
+        if (NegativeReferenceTable.find(f) != NegativeReferenceTable.end())
+        {
+            return NegativeReferenceTable.at(f);
+        }
+
+        BDD_ID newID = Table.size();
+        Table.insert({newID, Node{true, 0, LowEdge{false, f}, topVar(f), ""}});
+        NegativeReferenceTable.insert({f, newID});
+        NegativeReferenceTable.insert({newID, f});
+        return newID;
+    }
+
+    std::unordered_map<BDD_ID, BDD_ID> NegativeReferenceTable;
+
 public:
     Manager()
     {
-        Table.insert({0, Node{0, 0, 0, "False"}});
-        Table.insert({1, Node{1, 1, 1, "True"}});
+        Table.insert({0, Node{false, 0, LowEdge{false, 0}, 0, "False"}});
+        Table.insert({1, Node{false, 1, LowEdge{false, 1}, 1, "True"}});
     }
 
     BDD_ID createVar(const std::string &label) override;

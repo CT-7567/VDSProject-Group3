@@ -343,7 +343,6 @@ TEST_F(ManagerFixture, XorTest)
     auto A_xor_B = manager.ite(var_a, manager.neg(var_b), var_b);
 
     EXPECT_EQ(A_xor_B, a_xor_b);
-
 }
 
 TEST_F(ManagerFixture, NandTest)
@@ -353,7 +352,6 @@ TEST_F(ManagerFixture, NandTest)
     auto A_nand_B = manager.ite(var_a, manager.neg(var_b), manager.True() );
 
     EXPECT_EQ(A_nand_B, a_nand_b);
-
 }
 
 TEST_F(ManagerFixture, NorTest)
@@ -363,7 +361,6 @@ TEST_F(ManagerFixture, NorTest)
     auto A_nor_B = manager.ite(var_a, manager.False(), manager.neg(var_b) );
 
     EXPECT_EQ(A_nor_B, a_nor_b);
-    
 }
 
 TEST_F(ManagerFixture, XnorTest)
@@ -373,7 +370,6 @@ TEST_F(ManagerFixture, XnorTest)
     auto A_xnor_B = manager.ite(var_a, var_b, manager.neg(var_b) );
 
     EXPECT_EQ(A_xnor_B, a_xnor_b);
-      
 }
 
 TEST_F(ManagerFixture, findNodesTest)
