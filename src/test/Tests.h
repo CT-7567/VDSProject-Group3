@@ -246,13 +246,23 @@ TEST_F(ManagerFixture, CoFactorFalseTest)
     EXPECT_EQ(manager.coFactorFalse(function, manager.False()), function);
     EXPECT_EQ(manager.coFactorFalse(manager.False(), var_a), manager.False());
     EXPECT_EQ(manager.coFactorFalse(manager.True(), var_a), manager.True());
+
+    manager.printTable();
+}
+
+TEST(coFactorFalse, topVariable)
+{
+    ClassProject::Manager manager = ClassProject::Manager();
+    ClassProject::BDD_ID idA = manager.createVar("a");
+    ClassProject::BDD_ID idB = manager.createVar("b");
+    ClassProject::BDD_ID res = manager.coFactorFalse(idA, idA);
+    EXPECT_EQ(res, manager.False());
 }
 
 TEST_F(ManagerFixture, TrueTest)
 {
     auto true_id = manager.True();
     EXPECT_EQ(true_id, 1);
-
 }
 
 TEST_F(ManagerFixture, isVarTest)
@@ -348,10 +358,12 @@ TEST_F(ManagerFixture, XorTest)
 TEST_F(ManagerFixture, NandTest)
 {
     auto a_nand_b = manager.nand2(var_a, var_b);
+    manager.printTable();
     
     auto A_nand_B = manager.ite(var_a, manager.neg(var_b), manager.True() );
 
     EXPECT_EQ(A_nand_B, a_nand_b);
+    manager.printTable();
 }
 
 TEST_F(ManagerFixture, NorTest)
@@ -361,6 +373,7 @@ TEST_F(ManagerFixture, NorTest)
     auto A_nor_B = manager.ite(var_a, manager.False(), manager.neg(var_b) );
 
     EXPECT_EQ(A_nor_B, a_nor_b);
+    manager.printTable();
 }
 
 TEST_F(ManagerFixture, XnorTest)
@@ -449,55 +462,92 @@ TEST_F(ManagerFixture, UniqueTableSizeTest)
     EXPECT_EQ(manager.uniqueTableSize(), table_size);
 }
 
-
-
-
 TEST(DrawNegGraphs, simpleCase)
 {
-    ClassProject::Manager table = ClassProject::Manager();
-    
-    auto var_A = table.createVar("a");
-    auto var_B = table.createVar("b");
-    auto var_C = table.createVar("c");
-    auto var_D = table.createVar("d");
+    ClassProject::Manager manager = ClassProject::Manager();
 
+    auto var_A = manager.createVar("a");
+    auto var_B = manager.createVar("b");
+    auto var_C = manager.createVar("c");
+    auto var_D = manager.createVar("d");
 
-    auto all_XOR = table.and2( table.and2( var_A, var_B ), table.and2( var_C, var_D ) );
+    auto all_AND = manager.and2(manager.and2(var_A, var_B), manager.and2(var_C, var_D));
+    auto all_NAND = manager.neg(manager.and2(manager.and2(var_A, var_B), manager.and2(var_C, var_D)));
 
-    auto all_NXOR = table.neg( table.and2( table.and2( var_A, var_B ), table.and2( var_C, var_D ) ) );
+    EXPECT_EQ(manager.coFactorFalse(all_AND, var_A), manager.False());
+    EXPECT_EQ(manager.coFactorFalse(all_AND, var_C), manager.False());
+    EXPECT_EQ(manager.coFactorFalse(all_AND, var_B), manager.False());
+    EXPECT_EQ(manager.coFactorFalse(all_AND, var_D), manager.False());
 
+    EXPECT_EQ(manager.coFactorFalse(all_NAND, var_A), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(all_NAND, var_C), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(all_NAND, var_B), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(all_NAND, var_D), manager.True());
 
-
-    table.printTable();
-
-
-    EXPECT_EQ(1, 0);
+    manager.printTable();
 }
-
-
 
 TEST(DrawNegGraphs2, simpleCase)
 {
-    ClassProject::Manager table = ClassProject::Manager();
-    
-    auto var_A = table.createVar("a");
-    auto var_B = table.createVar("b");
-    auto var_C = table.createVar("c");
-    auto var_D = table.createVar("d");
+    ClassProject::Manager manager = ClassProject::Manager();
 
+    auto var_A = manager.createVar("a");
+    auto var_B = manager.createVar("b");
+    auto var_C = manager.createVar("c");
+    auto var_D = manager.createVar("d");
 
-    auto all_XOR = table.or2( table.or2( var_A, var_B ), table.or2( var_C, var_D ) );
+    auto all_OR = manager.or2(manager.or2(var_A, var_B), manager.or2(var_C, var_D));
+    auto all_NOR = manager.neg(manager.or2(manager.or2(var_A, var_B), manager.or2(var_C, var_D)));
 
-    auto all_NXOR = table.neg( table.or2( table.or2( var_A, var_B ), table.or2( var_C, var_D ) ) );
+    EXPECT_EQ(manager.coFactorTrue(all_OR, var_A), manager.True());
+    EXPECT_EQ(manager.coFactorTrue(all_OR, var_C), manager.True());
+    EXPECT_EQ(manager.coFactorTrue(all_OR, var_B), manager.True());
+    EXPECT_EQ(manager.coFactorTrue(all_OR, var_D), manager.True());
 
+    EXPECT_EQ(manager.coFactorTrue(all_NOR, var_A), manager.False());
+    EXPECT_EQ(manager.coFactorTrue(all_NOR, var_C), manager.False());
+    EXPECT_EQ(manager.coFactorTrue(all_NOR, var_B), manager.False());
+    EXPECT_EQ(manager.coFactorTrue(all_NOR, var_D), manager.False());
 
-
-    table.printTable();
-
-
-    EXPECT_EQ(1, 0);
+    manager.printTable();
 }
 
+TEST(ComplementedEdge, LowEdgeCase)
+{
+    ClassProject::Manager manager = ClassProject::Manager();
 
+    auto var_a = manager.createVar("a");
+    auto var_b = manager.createVar("b");
+
+    auto not_b = manager.neg(var_b);
+
+    auto f = manager.or2(var_a, not_b);
+
+    EXPECT_EQ(manager.coFactorTrue(f, var_a), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(f, var_a), not_b);
+    EXPECT_EQ(manager.coFactorTrue(f, var_b), var_a);
+    EXPECT_EQ(manager.coFactorFalse(f, var_b), manager.True());
+
+    manager.printTable();
+}
+
+TEST(ComplementedEdge, HighEdgeCase)
+{
+    ClassProject::Manager manager = ClassProject::Manager();
+
+    auto var_a = manager.createVar("a");
+    auto var_b = manager.createVar("b");
+
+    auto not_b = manager.neg(var_b);
+
+    auto f = manager.and2(var_a, not_b);
+
+    EXPECT_EQ(manager.coFactorTrue(f, var_a), not_b);
+    EXPECT_EQ(manager.coFactorFalse(f, var_a), manager.False());
+    EXPECT_EQ(manager.coFactorTrue(f, var_b), manager.False());
+    EXPECT_EQ(manager.coFactorFalse(f, var_b), var_a);
+
+    manager.printTable();
+}
 
 #endif
