@@ -54,21 +54,20 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
     if (isConstant(i)) {
         if (i == 1) {
             return t;
-        } else
-            return e;
+        }
+
+        return e;
     }
 
-    if (t == False() && e == True())
-    {
+    if (t == False() && e == True()) {
         return negativeReference(i);
     }
 
-    if (ComputedTable.find({i, t, e}) != ComputedTable.end())
-    {
+    if (ComputedTable.find({i, t, e}) != ComputedTable.end()) {
         return ComputedTable.at({i, t, e});
     }
 
-    BDD_ID rHigh, rLow, topVariable;
+    BDD_ID topVariable;
     auto TopA = topVar(i);
     auto TopB = topVar(t);
     auto TopC = topVar(e);
@@ -78,11 +77,12 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
         topVariable = std::min(TopB, TopA);
     } else if (isConstant(TopB) and !isConstant(TopC)) {
         topVariable = std::min(TopA, TopC);
-    } else
+    } else {
         topVariable = TopA;
+    }
 
-    rHigh = ite(coFactorTrue(i, topVariable), coFactorTrue(t, topVariable), coFactorTrue(e, topVariable));
-    rLow = ite(coFactorFalse(i, topVariable), coFactorFalse(t, topVariable), coFactorFalse(e, topVariable));
+    BDD_ID rHigh = ite(coFactorTrue(i, topVariable), coFactorTrue(t, topVariable), coFactorTrue(e, topVariable));
+    BDD_ID rLow = ite(coFactorFalse(i, topVariable), coFactorFalse(t, topVariable), coFactorFalse(e, topVariable));
     
     bool complementLow = false;
     bool complementNode = false;
@@ -104,8 +104,9 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
         return rHigh;
     }
 
-    if (SubGraphTable.find({topVariable, rLow, rHigh}) != SubGraphTable.end())
+    if (SubGraphTable.find({topVariable, rLow, rHigh}) != SubGraphTable.end()) {
         return SubGraphTable.at({topVariable, rLow, rHigh});
+    }
 
     BDD_ID newID = Table.size();
 
@@ -124,8 +125,9 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
     
     Table.insert({newID, Node{false, rHigh, LowEdge{complementLow, rLow}, topVariable, ""}});
 
-    if (complementNode)
+    if (complementNode) {
         newID = negativeReference(newID);
+    }
 
     ComputedTable.emplace(ComputedTableEntry{i, t, e}, newID);
     SubGraphTable.emplace(SubGraphTableEntry{topVariable, rLow, rHigh}, newID);
@@ -140,47 +142,40 @@ BDD_ID Manager::coFactorTrue(BDD_ID f, BDD_ID x)
         return f;
     }
 
-    bool isComplemented = Table.at(f).complemented;
+    if (Table.at(f).complemented) {
+        BDD_ID tempNode = Table.at(f).Low.node;
+        if (topVar(f) == x) {
+            return negativeReference(Table.at(tempNode).High);
+        }
 
-    if (topVar(f) == x)
-    {
-        auto terminalCase = Table.at(f).High;
+        BDD_ID false_case;
+        BDD_ID true_case = coFactorTrue(Table.at(Table.at(f).Low.node).High, x);
 
-        if (!isComplemented)
-            return Table.at(f).High;
-        else
-            return negativeReference(Table.at(Table.at(f).Low.node).High);
+        if (Table.at(tempNode).Low.complemented) {
+            false_case = negativeReference(coFactorTrue(Table.at(tempNode).Low.node, x));
+        } else {
+            false_case = coFactorTrue(Table.at(tempNode).Low.node, x);
+        }
+
+        auto result = ite(topVar(f), true_case, false_case);
+        return negativeReference(result);
     }
 
-    BDD_ID true_case;
+    if (topVar(f) == x) {
+        return Table.at(f).High;
+    }
+
     BDD_ID false_case;
-    
-    if (isComplemented)
-        true_case = coFactorTrue(Table.at(Table.at(f).Low.node).High, x);
-    else
-        true_case = coFactorTrue(Table.at(f).High, x);
+    BDD_ID true_case = coFactorTrue(Table.at(f).High, x);
 
-    BDD_ID tempNode;
-    if (isComplemented)
-        tempNode = Table.at(f).Low.node;
-    else
-        tempNode = f;
-
-    if (Table.at(tempNode).Low.complemented)
-    {
-        false_case = negativeReference(coFactorTrue(Table.at(tempNode).Low.node, x));
-    }
-    else
-    {
-        false_case = coFactorTrue(Table.at(tempNode).Low.node, x);
+    if (Table.at(f).Low.complemented) {
+        false_case = negativeReference(coFactorTrue(Table.at(f).Low.node, x));
+    } else {
+        false_case = coFactorTrue(Table.at(f).Low.node, x);
     }
 
     auto result = ite(topVar(f), true_case, false_case);
-
-    if (isComplemented)
-        return negativeReference(result);
-    else
-        return result;
+    return result;
 }
 
 BDD_ID Manager::coFactorFalse(BDD_ID f, BDD_ID x)
@@ -190,63 +185,53 @@ BDD_ID Manager::coFactorFalse(BDD_ID f, BDD_ID x)
         return f;
     }
 
-    bool isComplemented = Table.at(f).complemented;
+    if (Table.at(f).complemented) {
+        BDD_ID tempNode = Table.at(f).Low.node;
 
-    if (topVar(f) == x)
-    {
+        if (topVar(f) == x) {
+            if (Table.at(tempNode).Low.complemented) {
+                return Table.at(tempNode).Low.node;
+            }
+
+            return negativeReference(Table.at(tempNode).Low.node);
+        }
+
+        BDD_ID true_case = coFactorFalse(Table.at(Table.at(f).Low.node).High, x);
+
+        BDD_ID false_case;
+        if (Table.at(tempNode).Low.complemented) {
+            false_case = negativeReference(coFactorFalse(Table.at(tempNode).Low.node, x));
+        } else {
+            false_case = coFactorFalse(Table.at(tempNode).Low.node, x);
+        }
+
+        auto result = ite(topVar(f), true_case, false_case);
+        return negativeReference(result);
+    }
+
+    if (topVar(f) == x) {
         BDD_ID terminalCase;
-        BDD_ID tempNode;
 
-        if (isComplemented)
-            tempNode = Table.at(f).Low.node;
-        else
-            tempNode = f;
-        
-        if (!Table.at(tempNode).Low.complemented)
-        {
-            terminalCase = Table.at(tempNode).Low.node;
-        }
-        else
-        {
-            terminalCase = negativeReference(Table.at(tempNode).Low.node);
+        if (!Table.at(f).Low.complemented) {
+            terminalCase = Table.at(f).Low.node;
+        } else {
+            terminalCase = negativeReference(Table.at(f).Low.node);
         }
 
-        if (!isComplemented)
-            return terminalCase;
-        else
-            return negativeReference(terminalCase); 
+        return terminalCase;
     }
 
-
-    BDD_ID true_case;
-    if (isComplemented)
-        true_case = coFactorFalse(Table.at(Table.at(f).Low.node).High, x);
-    else
-        true_case = coFactorFalse(Table.at(f).High, x);
-
+    BDD_ID true_case = coFactorFalse(Table.at(f).High, x);
     BDD_ID false_case;
-    BDD_ID tempNode;
-    
-    if (isComplemented)
-        tempNode = Table.at(f).Low.node;
-    else
-        tempNode = f;
 
-    if (Table.at(tempNode).Low.complemented)
-    {
-        false_case = negativeReference(coFactorFalse(Table.at(tempNode).Low.node, x));
-    }
-    else
-    {
-        false_case = coFactorFalse(Table.at(tempNode).Low.node, x);
+    if (Table.at(f).Low.complemented) {
+        false_case = negativeReference(coFactorFalse(Table.at(f).Low.node, x));
+    } else {
+        false_case = coFactorFalse(Table.at(f).Low.node, x);
     }
 
     auto result = ite(topVar(f), true_case, false_case);
-
-    if (isComplemented)
-        return negativeReference(result);
-    else
-        return result;
+    return result;
 }
 
 BDD_ID Manager::coFactorTrue(BDD_ID f)
