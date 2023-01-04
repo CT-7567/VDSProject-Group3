@@ -22,6 +22,21 @@ private:
     {
         bool complemented;
         BDD_ID node;
+
+        bool operator==(const LowEdge &other) const
+        {
+            return (other.complemented == complemented && other.node == node);
+        }
+    };
+
+    struct LowEdgeHasher
+    {
+        std::size_t operator()(const LowEdge &e) const
+        {
+            using std::hash;
+
+            return hash<bool>()(e.complemented) << 1 ^ (hash<BDD_ID>()(e.node) << 1);
+        }
     };
 
     struct Node
@@ -65,7 +80,7 @@ private:
     struct SubGraphTableEntry
     {
         BDD_ID topVar;
-        BDD_ID low;
+        LowEdge low;
         BDD_ID high;
 
         bool operator==(const SubGraphTableEntry &other) const
@@ -79,9 +94,8 @@ private:
         std::size_t operator()(const SubGraphTableEntry &k) const
         {
             using std::hash;
-            using std::size_t;
 
-            return ((hash<BDD_ID>()(k.topVar) ^ (hash<BDD_ID>()(k.low) << 1)) >> 1) ^ (hash<BDD_ID>()(k.high) << 1);
+            return ((hash<BDD_ID>()(k.topVar) ^ (LowEdgeHasher()(k.low) << 1)) >> 1) ^ (hash<BDD_ID>()(k.high) << 1);
         }
     };
 
@@ -105,7 +119,8 @@ private:
 public:
     Manager()
     {
-        Table.insert({0, Node{false, 0, LowEdge{false, 0}, 0, "False"}});
+        Table.insert({0, Node{true, 0, LowEdge{false, 1}, 0, "False"}});
+        // Table.insert({0, Node{false, 0, LowEdge{false, 0}, 0, "False"}});
         Table.insert({1, Node{false, 1, LowEdge{false, 1}, 1, "True"}});
     }
 
@@ -131,7 +146,9 @@ public:
     void findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root) override;
     void findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root) override;
     size_t uniqueTableSize() override;
-    void printTable();
+
+    void printTable() const;
+    void printTruthTable(BDD_ID f);
 };
 
 } // namespace ClassProject

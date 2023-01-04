@@ -393,16 +393,16 @@ TEST_F(ManagerFixture, findNodesTest)
 
     manager.findNodes(a_and_b, allNodesOf_a_and_b);
 
-    EXPECT_EQ(allNodesOf_a_and_b.size(), 4);
+    EXPECT_EQ(allNodesOf_a_and_b.size(), 3);
     EXPECT_EQ(allNodesOf_a_and_b.count(a_and_b), 1);
     EXPECT_EQ(allNodesOf_a_and_b.count(var_a), 0);
     EXPECT_EQ(allNodesOf_a_and_b.count(var_b), 1);
     EXPECT_EQ(allNodesOf_a_and_b.count(manager.True()), 1);
-    EXPECT_EQ(allNodesOf_a_and_b.count(manager.False()), 1);
+    // EXPECT_EQ(allNodesOf_a_and_b.count(manager.False()), 1);
 
     manager.findNodes(function, allNodesOfF);
 
-    EXPECT_EQ(allNodesOfF.size(), 6);
+    EXPECT_EQ(allNodesOfF.size(), 5);
     EXPECT_EQ(allNodesOfF.count(9), 1);
     EXPECT_EQ(allNodesOfF.count(8), 1);
     EXPECT_EQ(allNodesOfF.count(7), 1);
@@ -548,6 +548,59 @@ TEST(ComplementedEdge, HighEdgeCase)
     EXPECT_EQ(manager.coFactorFalse(f, var_b), var_a);
 
     manager.printTable();
+}
+
+TEST(SampleFunction, AB_NOT_AND_CD)
+{
+    ClassProject::Manager manager = ClassProject::Manager();
+
+    auto var_a = manager.createVar("a");
+    auto var_b = manager.createVar("b");
+    auto var_c = manager.createVar("c");
+    auto var_d = manager.createVar("d");
+
+    std::cout << "a_and_b\n";
+    auto a_and_b = manager.and2(var_a, var_b);
+    manager.printTruthTable(a_and_b);
+
+    std::cout << "\nc_and_d\n";
+    auto c_and_d = manager.and2(var_c, var_d);
+    manager.printTruthTable(c_and_d);
+
+    std::cout << "\nnot_a_and_b\n";
+    auto not_a_and_b = manager.neg(a_and_b);
+    manager.printTruthTable(not_a_and_b);
+
+    std::cout << "\nnot_a_and_b__and_c_and_d\n";
+    auto not_a_and_b__and_c_and_d = manager.and2(not_a_and_b, c_and_d);
+    manager.printTruthTable(not_a_and_b__and_c_and_d);
+
+    std::cout << "\nf\n";
+    auto f = manager.neg(not_a_and_b__and_c_and_d);
+
+    manager.printTable();
+    manager.printTruthTable(f);
+}
+
+TEST(SampleFunction, NOR)
+{
+    ClassProject::Manager manager = ClassProject::Manager();
+
+    auto var_a = manager.createVar("a");
+    auto var_b = manager.createVar("b");
+    auto var_c = manager.createVar("c");
+    auto var_d = manager.createVar("d");
+
+    auto a_or_b = manager.or2(var_a, var_b);
+    auto not_a_or_b = manager.neg(a_or_b);
+
+    auto c_or_d = manager.or2(var_c, var_d);
+    auto c_or_d_or_not_a_or_b = manager.or2(c_or_d, not_a_or_b);
+
+    auto f = manager.neg(c_or_d_or_not_a_or_b);
+
+    manager.printTable();
+    manager.printTruthTable(f);
 }
 
 #endif

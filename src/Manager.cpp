@@ -1,5 +1,6 @@
 #include "Manager.h"
 
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <algorithm>
@@ -11,7 +12,7 @@ BDD_ID Manager::createVar(const std::string &label)
     BDD_ID newID = Table.size();
     Table.insert({newID, Node{false, 1, LowEdge{true, 1}, newID, label}});
 
-    SubGraphTable.emplace(SubGraphTableEntry{newID, 0, 1}, newID);
+    SubGraphTable.emplace(SubGraphTableEntry{newID, LowEdge{true, 1}, 1}, newID);
     NegativeReferenceTable.emplace(FALSE_ID, TRUE_ID);
     NegativeReferenceTable.emplace(TRUE_ID, FALSE_ID);
 
@@ -81,8 +82,16 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
         topVariable = TopA;
     }
 
-    BDD_ID rHigh = ite(coFactorTrue(i, topVariable), coFactorTrue(t, topVariable), coFactorTrue(e, topVariable));
-    BDD_ID rLow = ite(coFactorFalse(i, topVariable), coFactorFalse(t, topVariable), coFactorFalse(e, topVariable));
+    auto test0 = coFactorTrue(i, topVariable);
+    auto test1 = coFactorTrue(t, topVariable);
+    auto test2 = coFactorTrue(e, topVariable);
+
+    auto test3 = coFactorFalse(i, topVariable);
+    auto test4 = coFactorFalse(t, topVariable);
+    auto test5 = coFactorFalse(e, topVariable);
+
+    BDD_ID rHigh = ite(test0, test1, test2);
+    BDD_ID rLow = ite(test3, test4, test5);
     
     bool complementLow = false;
     bool complementNode = false;
@@ -100,12 +109,20 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
         rHigh = Table.at(rHigh).Low.node;
     }
 
-    if (rHigh == rLow) {
-        return rHigh;
+    if (rHigh == rLow && !complementLow) {
+        if (complementNode)
+            return negativeReference(rHigh);
+        else
+            return rHigh;
     }
 
-    if (SubGraphTable.find({topVariable, rLow, rHigh}) != SubGraphTable.end()) {
-        return SubGraphTable.at({topVariable, rLow, rHigh});
+    auto lowEdge = LowEdge{complementLow, rLow};
+
+    if (SubGraphTable.find({topVariable, lowEdge, rHigh}) != SubGraphTable.end()) {
+        if (complementNode)
+            return negativeReference(SubGraphTable.at({topVariable, lowEdge, rHigh}));
+        else
+            return SubGraphTable.at({topVariable, lowEdge, rHigh});
     }
 
     BDD_ID newID = Table.size();
@@ -123,14 +140,14 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
     //     new_label = "(" + Table.at(Table.at(x).TopVar).Label + "*" + Table.at(rHigh).Label + ")";
     // }
     
-    Table.insert({newID, Node{false, rHigh, LowEdge{complementLow, rLow}, topVariable, ""}});
+    Table.insert({newID, Node{false, rHigh, lowEdge, topVariable, ""}});
 
     if (complementNode) {
         newID = negativeReference(newID);
     }
 
     ComputedTable.emplace(ComputedTableEntry{i, t, e}, newID);
-    SubGraphTable.emplace(SubGraphTableEntry{topVariable, rLow, rHigh}, newID);
+    SubGraphTable.emplace(SubGraphTableEntry{topVariable, LowEdge{complementLow, rLow}, rHigh}, newID);
 
     return newID;
 }
@@ -316,20 +333,13 @@ std::string Manager::getTopVarName(const BDD_ID &root)
 
 void Manager::findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root)
 {
-    // if (Table.at(root).complemented)
-    //     return findNodes(Table.at(root).)
+    nodes_of_root.insert(root);
 
-    if (!isConstant(root)) {
-        nodes_of_root.insert(root);
+    if (isConstant(root))
+        return;
 
-        // nodes_of_root.insert( Tabel.at(root).TopVar );
-
-        findNodes(Table.at(root).High, nodes_of_root);
-        findNodes(Table.at(root).Low.node, nodes_of_root);
-    } else {
-
-        nodes_of_root.insert(root);
-    }
+    findNodes(Table.at(root).High, nodes_of_root);
+    findNodes(Table.at(root).Low.node, nodes_of_root);
 }
 
 void Manager::findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root)
@@ -348,7 +358,7 @@ size_t Manager::uniqueTableSize()
     return Table.size();
 }
 
-void Manager::printTable()
+void Manager::printTable() const
 {
     std::cout << std::setw(10) << "ID" << std::setw(25) << "Label" << std::setw(10) << "High" << std::setw(10) << "Low"
               << std::setw(20) << "LowComplemented" << std::setw(10) << "TopVar" << std::setw(10) << "RefNode"
@@ -360,6 +370,46 @@ void Manager::printTable()
                   << node.Low.node << std::setw(20) << node.Low.complemented << std::setw(10) << node.TopVar
                   << std::setw(10) << node.complemented << std::endl;
     }
+}
+
+void Manager::printTruthTable(BDD_ID f)
+{
+    std::set<BDD_ID> vars;
+    findVars(f, vars);
+
+    for (auto var : vars)
+    {
+        auto const &node = Table.at(var);
+        std::cout << std::setw(5) << node.Label;
+    }
+
+    std::cout << std::setw(5) << "f" << std::endl;
+
+    int level = vars.size();
+
+    std::function<void(BDD_ID, std::vector<int>)> printSubTable;
+    printSubTable = [this, level, &printSubTable](BDD_ID f, std::vector<int> subTable) {
+        if (subTable.size() == level) {
+            subTable.push_back(f);
+            
+            for(auto i : subTable) {
+                std::cout << std::setw(5) << i;
+            }
+            
+            std::cout << std::endl;
+            return;
+        }
+
+        subTable.push_back(0);
+        printSubTable(coFactorFalse(f), subTable);
+
+        subTable.pop_back();
+        subTable.push_back(1);
+        printSubTable(coFactorTrue(f), subTable);
+    };
+
+    std::vector<int> subTable;
+    printSubTable(f, subTable);
 }
 
 }; // namespace ClassProject
