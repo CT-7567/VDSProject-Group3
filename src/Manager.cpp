@@ -3,13 +3,14 @@
 #include <iomanip>
 #include <iostream>
 #include <algorithm>
+#include <functional>
 
 namespace ClassProject {
 
 BDD_ID Manager::createVar(const std::string &label)
 {
     BDD_ID newID = Table.size();
-    Table.insert({newID, Node{1, 0, newID, label}});
+    Table.emplace_back(Node{1, 0, newID, label});
 
     SubGraphTable.emplace(SubGraphTableEntry{newID, 0, 1}, newID);
 
@@ -28,18 +29,12 @@ const BDD_ID &Manager::False()
 
 bool Manager::isConstant(BDD_ID f)
 {
-    if (f == 0 or f == 1) {
-        return true;
-    }
-    return false;
+    return (f == 0 or f == 1);
 }
 
 bool Manager::isVariable(BDD_ID x)
 {
-    if ((Table.at(x).TopVar == x) && (x != TRUE_ID) && (x != FALSE_ID)) {
-        return true;
-    }
-    return false;
+    return (Table.at(x).TopVar == x) && (x != TRUE_ID) && (x != FALSE_ID);
 }
 
 BDD_ID Manager::topVar(BDD_ID f)
@@ -56,9 +51,16 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
             return e;
     }
 
-    if (ComputedTable.find({i, t, e}) != ComputedTable.end())
+    if (t == 1 && e == 0)
+        return i;
+    
+    if (t == e)
+        return t;
+
+    auto computedIt = ComputedTable.find({i, t, e});
+    if (computedIt != ComputedTable.end())
     {
-        return ComputedTable.at({i, t, e});
+        return computedIt->second;
     }
 
     BDD_ID rHigh, rLow, x;
@@ -75,15 +77,18 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
         x = TopA;
 
     rHigh = ite(coFactorTrue(i, x), coFactorTrue(t, x), coFactorTrue(e, x));
-
     rLow = ite(coFactorFalse(i, x), coFactorFalse(t, x), coFactorFalse(e, x));
 
     if (rHigh == rLow) {
         return rHigh;
     }
 
-    if (SubGraphTable.find({x, rLow, rHigh}) != SubGraphTable.end())
-        return SubGraphTable.at({x, rLow, rHigh});
+    auto subGraphIt = SubGraphTable.find({x, rLow, rHigh});
+    if (subGraphIt != SubGraphTable.end())
+    {
+        ComputedTable.emplace(ComputedTableEntry{i, t, e}, subGraphIt->second);
+        return subGraphIt->second;
+    }
 
     BDD_ID newID = Table.size();
     std::string new_label = "test";
@@ -98,7 +103,7 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
     // } else if (rLow == FALSE_ID) {
     //     new_label = "(" + Table.at(Table.at(x).TopVar).Label + "*" + Table.at(rHigh).Label + ")";
     // }
-    Table.insert({newID, {rHigh, rLow, x, new_label}});
+    Table.emplace_back(Node{rHigh, rLow, x, new_label});
 
     ComputedTable.emplace(ComputedTableEntry{i, t, e}, newID);
     SubGraphTable.emplace(SubGraphTableEntry{x, rLow, rHigh}, newID);
@@ -257,7 +262,7 @@ size_t Manager::uniqueTableSize()
     return Table.size();
 }
 
-void Manager::printTable()
+void Manager::printTable() const
 {
     std::cout << std::setw(10) << "ID" << std::setw(25) << "Label" << std::setw(10) << "High" << std::setw(10) << "Low"
               << std::setw(10) << "TopVar" << std::endl;
@@ -267,6 +272,46 @@ void Manager::printTable()
         std::cout << std::setw(10) << i << std::setw(25) << node.Label << std::setw(10) << node.High << std::setw(10)
                   << node.Low << std::setw(10) << node.TopVar << std::endl;
     }
+}
+
+void Manager::printTruthTable(BDD_ID f)
+{
+    std::set<BDD_ID> vars;
+    findVars(f, vars);
+
+    for (auto var : vars)
+    {
+        auto const &node = Table.at(var);
+        std::cout << std::setw(5) << node.Label;
+    }
+
+    std::cout << std::setw(5) << "f" << std::endl;
+
+    int level = vars.size();
+
+    std::function<void(BDD_ID, std::vector<int>)> printSubTable;
+    printSubTable = [this, level, &printSubTable](BDD_ID f, std::vector<int> subTable) {
+        if (subTable.size() == level) {
+            subTable.push_back(f);
+            
+            for(auto i : subTable) {
+                std::cout << std::setw(5) << i;
+            }
+            
+            std::cout << std::endl;
+            return;
+        }
+
+        subTable.push_back(0);
+        printSubTable(coFactorFalse(f), subTable);
+
+        subTable.pop_back();
+        subTable.push_back(1);
+        printSubTable(coFactorTrue(f), subTable);
+    };
+
+    std::vector<int> subTable;
+    printSubTable(f, subTable);
 }
 
 }; // namespace ClassProject

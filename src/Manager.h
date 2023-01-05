@@ -28,7 +28,7 @@ public:
         std::string Label;
     };
 
-    std::unordered_map<BDD_ID, Node> Table;
+    std::vector<Node> Table;
 
     struct ComputedTableEntry
     {
@@ -82,8 +82,8 @@ public:
 
     Manager()
     {
-        Table.insert({0, Node{0, 0, 0, "False"}});
-        Table.insert({1, Node{1, 1, 1, "True"}});
+        Table.emplace_back(Node{0, 0, 0, "False"});
+        Table.emplace_back(Node{1, 1, 1, "True"});
     }
 
     BDD_ID createVar(const std::string &label) override;
@@ -108,7 +108,9 @@ public:
     void findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root) override;
     void findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root) override;
     size_t uniqueTableSize() override;
-    void printTable();
+
+    void printTable() const;
+    void printTruthTable(BDD_ID f);    
 };
 
 } // namespace ClassProject
