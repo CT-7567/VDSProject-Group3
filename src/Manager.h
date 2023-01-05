@@ -14,38 +14,16 @@ namespace ClassProject {
 
 class Manager : public ManagerInterface
 {
-private:
+
     static constexpr BDD_ID FALSE_ID = 0;
     static constexpr BDD_ID TRUE_ID = 1;
 
-    struct LowEdge
-    {
-        bool complemented;
-        BDD_ID node;
-
-        bool operator==(const LowEdge &other) const
-        {
-            return (other.complemented == complemented && other.node == node);
-        }
-    };
-
-    struct LowEdgeHasher
-    {
-        std::size_t operator()(const LowEdge &e) const
-        {
-            using std::hash;
-
-            return hash<bool>()(e.complemented) << 1 ^ (hash<BDD_ID>()(e.node) << 1);
-        }
-    };
-
+public:
     struct Node
     {
-        // Indicates that this is a complemented root node
-        bool complemented;
 
         BDD_ID High;
-        LowEdge Low;
+        BDD_ID Low;
         BDD_ID TopVar;
         std::string Label;
     };
@@ -80,7 +58,7 @@ private:
     struct SubGraphTableEntry
     {
         BDD_ID topVar;
-        LowEdge low;
+        BDD_ID low;
         BDD_ID high;
 
         bool operator==(const SubGraphTableEntry &other) const
@@ -94,34 +72,18 @@ private:
         std::size_t operator()(const SubGraphTableEntry &k) const
         {
             using std::hash;
+            using std::size_t;
 
-            return ((hash<BDD_ID>()(k.topVar) ^ (LowEdgeHasher()(k.low) << 1)) >> 1) ^ (hash<BDD_ID>()(k.high) << 1);
+            return ((hash<BDD_ID>()(k.topVar) ^ (hash<BDD_ID>()(k.low) << 1)) >> 1) ^ (hash<BDD_ID>()(k.high) << 1);
         }
     };
 
     std::unordered_map<SubGraphTableEntry, BDD_ID, SubGraphTableEntryHasher> SubGraphTable;
 
-    BDD_ID negativeReference(BDD_ID f) {
-        if (NegativeReferenceTable.find(f) != NegativeReferenceTable.end())
-        {
-            return NegativeReferenceTable.at(f);
-        }
-
-        BDD_ID newID = Table.size();
-        Table.insert({newID, Node{true, 0, LowEdge{false, f}, topVar(f), ""}});
-        NegativeReferenceTable.insert({f, newID});
-        NegativeReferenceTable.insert({newID, f});
-        return newID;
-    }
-
-    std::unordered_map<BDD_ID, BDD_ID> NegativeReferenceTable;
-
-public:
     Manager()
     {
-        Table.insert({0, Node{true, 0, LowEdge{false, 1}, 0, "False"}});
-        // Table.insert({0, Node{false, 0, LowEdge{false, 0}, 0, "False"}});
-        Table.insert({1, Node{false, 1, LowEdge{false, 1}, 1, "True"}});
+        Table.insert({0, Node{0, 0, 0, "False"}});
+        Table.insert({1, Node{1, 1, 1, "True"}});
     }
 
     BDD_ID createVar(const std::string &label) override;
@@ -146,9 +108,7 @@ public:
     void findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root) override;
     void findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root) override;
     size_t uniqueTableSize() override;
-
-    void printTable() const;
-    void printTruthTable(BDD_ID f);
+    void printTable();
 };
 
 } // namespace ClassProject

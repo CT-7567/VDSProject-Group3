@@ -77,9 +77,8 @@ TEST(ite, OR_Case)
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID idB = table.createVar("b");
-    ClassProject::BDD_ID a_or_b = table.ite(idA, 1, idB);
-    EXPECT_EQ(table.coFactorTrue(a_or_b), table.True());
-    EXPECT_EQ(table.coFactorFalse(a_or_b), idB);
+    EXPECT_EQ(table.Table.at(table.ite(idA, table.True(), idB)).Low, idB);
+    EXPECT_EQ(table.Table.at(table.ite(idA, table.True(), idB)).High, 1);
 
     table.printTable();
 }
@@ -89,21 +88,11 @@ TEST(ite, AND_Case)
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID idB = table.createVar("b");
-    ClassProject::BDD_ID a_and_b = table.ite(idA, idB, 0);
-    EXPECT_EQ(table.coFactorTrue(a_and_b), idB);
-    EXPECT_EQ(table.coFactorFalse(a_and_b), table.False());
+    ClassProject::BDD_ID x = table.ite(idA, idB, 0);
+    EXPECT_EQ(table.Table.at(x).Low, 0);
+    EXPECT_EQ(table.Table.at(x).High, idB);
 
     table.printTable();
-}
-
-TEST(ite, node_exist_already)
-{
-    ClassProject::Manager table = ClassProject::Manager();
-    ClassProject::BDD_ID idA = table.createVar("a");
-    ClassProject::BDD_ID idB = table.createVar("b");
-    ClassProject::BDD_ID a_and_b = table.ite(idA, idB, 0);
-    ClassProject::BDD_ID a_and_b2 = table.ite(idA, idB, 0);
-    EXPECT_EQ(a_and_b, a_and_b2);
 }
 
 TEST(neg, terminalCase)
@@ -118,13 +107,38 @@ TEST(neg, simpleCase)
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID test = table.neg(idA);
-    EXPECT_EQ(table.coFactorFalse(idA), table.coFactorTrue(test));
-    EXPECT_EQ(table.coFactorTrue(idA), table.coFactorFalse(test));
+    EXPECT_EQ(table.Table.at(test).Low, 1);
+    EXPECT_EQ(table.Table.at(test).High, 0);
     // two times neg should be the original
     EXPECT_EQ(table.neg(test), idA);
     table.printTable();
 }
-TEST(neg, withFunction) {
+
+TEST(neg, complexCase)
+{
+    ClassProject::Manager table = ClassProject::Manager();
+    ClassProject::BDD_ID idA = table.createVar("a");
+    ClassProject::BDD_ID idB = table.createVar("b");
+    ClassProject::BDD_ID idAn = table.createVar("an");
+    table.Table.at(idAn).Low = 1;
+    table.Table.at(idAn).High = 0;
+    ClassProject::BDD_ID idBn = table.createVar("bn");
+    table.Table.at(idBn).Low = 1;
+    table.Table.at(idBn).High = 0;
+    ClassProject::BDD_ID or_id = table.ite(idA, 1, idB);
+    ClassProject::BDD_ID or_not_id = table.neg(or_id);
+    std::cout << "ID or not : " << or_not_id << std::endl;
+    EXPECT_EQ(table.Table.at(or_not_id).High, 0);
+    ClassProject::BDD_ID idB_not = table.Table.at(or_not_id).Low;
+    std::cout << "ID b not : " << idB_not << std::endl;
+    EXPECT_EQ(table.Table.at(or_not_id).Low, idB_not);
+    EXPECT_EQ(table.Table.at(idB_not).Low, 1);
+    EXPECT_EQ(table.Table.at(idB_not).High, 0);
+    table.printTable();
+}
+
+TEST(neg, withFunction)
+{
     ClassProject::Manager table = ClassProject::Manager();
     ClassProject::BDD_ID idA = table.createVar("a");
     ClassProject::BDD_ID idB = table.createVar("b");
@@ -182,24 +196,40 @@ TEST(neg, withFunction) {
      *      a   b   c   d   |f
      * 16:  1   1   1   1   |0
      */
-    EXPECT_EQ(table.coFactorTrue(table.coFactorTrue(table.coFactorTrue(table.coFactorTrue(id_not_F)))), table.False());
-    EXPECT_EQ(table.coFactorTrue(table.coFactorTrue(table.coFactorTrue(table.coFactorFalse(id_not_F)))), table.False());
-    EXPECT_EQ(table.coFactorTrue(table.coFactorTrue(table.coFactorFalse(table.coFactorTrue(id_not_F)))), table.False());
-    EXPECT_EQ(table.coFactorTrue(table.coFactorFalse(table.coFactorTrue(table.coFactorFalse(id_not_F)))), table.True());
-    EXPECT_EQ(table.coFactorTrue(table.coFactorFalse(table.coFactorFalse(table.coFactorTrue(id_not_F)))), table.True());
-    EXPECT_EQ(table.coFactorFalse(table.coFactorFalse(table.coFactorFalse(table.coFactorFalse(id_not_F)))), table.True());
+    // 13,14,15,16
+    EXPECT_EQ(table.Table.at(table.Table.at(id_not_F).High).High, 0);
+    // 1,2,5,6
+    EXPECT_EQ(table.Table.at(table.Table.at(id_not_F).Low).Low, 1);
+    // 4,8
+    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(id_not_F).Low).High).High, 0);
+    // 3, 7
+    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(id_not_F).Low).High).Low, 1);
+    // 9, 10
+    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(id_not_F).High).Low).Low, 1);
+    // 11
+    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(table.Table.at(id_not_F).High).Low).High).Low, 1);
+    // 12
+    EXPECT_EQ(table.Table.at(table.Table.at(table.Table.at(table.Table.at(id_not_F).High).Low).High).High, 0);
+    table.printTable();
 }
-
-
 
 TEST_F(ManagerFixture, FalseTest)
 {
     auto false_id = manager.False();
     EXPECT_EQ(false_id, 0);
+
+    auto false_node = manager.Table.at(false_id);
+    EXPECT_EQ(false_node.High, 0);
+    EXPECT_EQ(false_node.Low, 0);
+    EXPECT_EQ(false_node.TopVar, 0);
 }
 
 TEST_F(ManagerFixture, TopVarTest)
 {
+    for (auto const &[node_id, node] : manager.Table) {
+        EXPECT_EQ(manager.topVar(node_id), node.TopVar);
+    }
+
     EXPECT_EQ(manager.topVar(var_a), var_a);
     EXPECT_EQ(manager.topVar(var_b), var_b);
     EXPECT_EQ(manager.topVar(var_c), var_c);
@@ -246,23 +276,17 @@ TEST_F(ManagerFixture, CoFactorFalseTest)
     EXPECT_EQ(manager.coFactorFalse(function, manager.False()), function);
     EXPECT_EQ(manager.coFactorFalse(manager.False(), var_a), manager.False());
     EXPECT_EQ(manager.coFactorFalse(manager.True(), var_a), manager.True());
-
-    manager.printTable();
-}
-
-TEST(coFactorFalse, topVariable)
-{
-    ClassProject::Manager manager = ClassProject::Manager();
-    ClassProject::BDD_ID idA = manager.createVar("a");
-    ClassProject::BDD_ID idB = manager.createVar("b");
-    ClassProject::BDD_ID res = manager.coFactorFalse(idA, idA);
-    EXPECT_EQ(res, manager.False());
 }
 
 TEST_F(ManagerFixture, TrueTest)
 {
     auto true_id = manager.True();
     EXPECT_EQ(true_id, 1);
+
+    auto true_node = manager.Table.at(true_id);
+    EXPECT_EQ(true_node.High, 1);
+    EXPECT_EQ(true_node.Low, 1);
+    EXPECT_EQ(true_node.TopVar, 1);
 }
 
 TEST_F(ManagerFixture, isVarTest)
@@ -299,11 +323,12 @@ TEST_F(ManagerFixture, TopVarNameTest)
 TEST_F(ManagerFixture, OrTest)
 {
     auto a_or_b = manager.or2(var_a, var_b);
-    
-    auto A_or_B = manager.ite(var_a, manager.True(), var_b);
-    
-    EXPECT_EQ(A_or_B, a_or_b);
-    
+    auto A_or_B = manager.Table.at(a_or_b);
+
+    // EXPECT_EQ(A_or_B.Label, "(a+b)");
+    EXPECT_EQ(A_or_B.High, manager.True());
+    EXPECT_EQ(A_or_B.Low, var_b);
+    EXPECT_EQ(A_or_B.TopVar, var_a);
 
     manager.printTable();
 }
@@ -311,11 +336,12 @@ TEST_F(ManagerFixture, OrTest)
 TEST_F(ManagerFixture, AndTest)
 {
     auto a_and_b = manager.and2(var_a, var_b);
+    auto A_and_B = manager.Table.at(a_and_b);
 
-    auto A_and_B = manager.ite(var_a, var_b, manager.False() );
-
-    EXPECT_EQ(A_and_B, a_and_b);
-
+    // EXPECT_EQ(A_and_B.Label, "(a*b)");
+    EXPECT_EQ(A_and_B.High, var_b);
+    EXPECT_EQ(A_and_B.Low, manager.False());
+    EXPECT_EQ(A_and_B.TopVar, var_a);
 
     manager.printTable();
 }
@@ -349,40 +375,98 @@ TEST_F(ManagerFixture, CoFacTrueTest)
 TEST_F(ManagerFixture, XorTest)
 {
     auto a_xor_b = manager.xor2(var_a, var_b);
-    
-    auto A_xor_B = manager.ite(var_a, manager.neg(var_b), var_b);
+    auto A_xor_B = manager.Table.at(a_xor_b);
 
-    EXPECT_EQ(A_xor_B, a_xor_b);
+    // EXPECT_EQ(A_xor_B.Label, "(a⊕b)");
+
+    EXPECT_EQ(A_xor_B.Low, var_b);
+    EXPECT_EQ(A_xor_B.TopVar, var_a);
+
+    auto bnot = A_xor_B.High;
+    auto Bnot = manager.Table.at(bnot);
+
+    EXPECT_EQ(Bnot.High, manager.False());
+    EXPECT_EQ(Bnot.Low, manager.True());
+    EXPECT_EQ(Bnot.TopVar, var_b);
+
+    manager.printTable();
 }
 
 TEST_F(ManagerFixture, NandTest)
 {
     auto a_nand_b = manager.nand2(var_a, var_b);
-    manager.printTable();
-    
-    auto A_nand_B = manager.ite(var_a, manager.neg(var_b), manager.True() );
+    auto A_nand_B = manager.Table.at(a_nand_b);
 
-    EXPECT_EQ(A_nand_B, a_nand_b);
+    EXPECT_EQ(A_nand_B.Low, manager.True());
+    EXPECT_EQ(A_nand_B.TopVar, var_a);
+
+    auto bnot = A_nand_B.High;
+    auto Bnot = manager.Table.at(bnot);
+
+    EXPECT_EQ(Bnot.High, manager.False());
+    EXPECT_EQ(Bnot.Low, manager.True());
+    EXPECT_EQ(Bnot.TopVar, var_b);
+
     manager.printTable();
 }
 
 TEST_F(ManagerFixture, NorTest)
 {
     auto a_nor_b = manager.nor2(var_a, var_b);
-    
-    auto A_nor_B = manager.ite(var_a, manager.False(), manager.neg(var_b) );
+    auto A_nor_B = manager.Table.at(a_nor_b);
 
-    EXPECT_EQ(A_nor_B, a_nor_b);
+    EXPECT_EQ(A_nor_B.High, manager.False());
+    EXPECT_EQ(A_nor_B.TopVar, var_a);
+
+    auto bnot = A_nor_B.Low;
+    auto Bnot = manager.Table.at(bnot);
+
+    EXPECT_EQ(Bnot.High, manager.False());
+    EXPECT_EQ(Bnot.Low, manager.True());
+    EXPECT_EQ(Bnot.TopVar, var_b);
+
     manager.printTable();
 }
 
 TEST_F(ManagerFixture, XnorTest)
 {
     auto a_xnor_b = manager.xnor2(var_a, var_b);
-    
-    auto A_xnor_B = manager.ite(var_a, var_b, manager.neg(var_b) );
+    auto A_xnor_B = manager.Table.at(a_xnor_b);
 
-    EXPECT_EQ(A_xnor_B, a_xnor_b);
+    EXPECT_EQ(A_xnor_B.High, var_b);
+    EXPECT_EQ(A_xnor_B.TopVar, var_a);
+
+    auto bnot = A_xnor_B.Low;
+    auto Bnot = manager.Table.at(bnot);
+
+    EXPECT_EQ(Bnot.High, manager.False());
+    EXPECT_EQ(Bnot.Low, manager.True());
+    EXPECT_EQ(Bnot.TopVar, var_b);
+
+    auto c_and_d = manager.and2(var_d, var_c);
+
+    auto a_xnor_c_and_d = manager.xnor2(var_a, c_and_d);
+    auto A_xnor_c_and_d = manager.Table.at(a_xnor_c_and_d);
+
+    auto c_and_dT = A_xnor_c_and_d.High;
+    auto C_and_D = manager.Table.at(c_and_d);
+
+    auto c_and_dT_not = A_xnor_c_and_d.Low;
+    auto C_and_D_not = manager.Table.at(c_and_dT_not);
+
+    EXPECT_EQ(c_and_d, c_and_dT);
+
+    EXPECT_EQ(C_and_D_not.TopVar, var_c);
+    // EXPECT_EQ(C_and_D_not.High, 16); // 16 = notD
+    EXPECT_EQ(C_and_D_not.Low, manager.True());
+
+    auto c_nand_d = manager.nand2(var_d, var_c);
+    auto C_nand_D = manager.Table.at(c_nand_d);
+
+    EXPECT_EQ(C_and_D_not.TopVar, C_nand_D.TopVar);
+    EXPECT_EQ(C_and_D_not.Low, C_nand_D.Low);
+
+    manager.printTable();
 }
 
 TEST_F(ManagerFixture, findNodesTest)
@@ -393,16 +477,16 @@ TEST_F(ManagerFixture, findNodesTest)
 
     manager.findNodes(a_and_b, allNodesOf_a_and_b);
 
-    EXPECT_EQ(allNodesOf_a_and_b.size(), 3);
+    EXPECT_EQ(allNodesOf_a_and_b.size(), 4);
     EXPECT_EQ(allNodesOf_a_and_b.count(a_and_b), 1);
     EXPECT_EQ(allNodesOf_a_and_b.count(var_a), 0);
     EXPECT_EQ(allNodesOf_a_and_b.count(var_b), 1);
     EXPECT_EQ(allNodesOf_a_and_b.count(manager.True()), 1);
-    // EXPECT_EQ(allNodesOf_a_and_b.count(manager.False()), 1);
+    EXPECT_EQ(allNodesOf_a_and_b.count(manager.False()), 1);
 
     manager.findNodes(function, allNodesOfF);
 
-    EXPECT_EQ(allNodesOfF.size(), 5);
+    EXPECT_EQ(allNodesOfF.size(), 6);
     EXPECT_EQ(allNodesOfF.count(9), 1);
     EXPECT_EQ(allNodesOfF.count(8), 1);
     EXPECT_EQ(allNodesOfF.count(7), 1);
@@ -429,6 +513,9 @@ TEST_F(ManagerFixture, findVarsTest)
     EXPECT_EQ(allVarsOf_a_and_b.count(manager.True()), 0);
     EXPECT_EQ(allVarsOf_a_and_b.count(manager.False()), 0);
 
+    std::cout << "Var of a*b: " << std::endl;
+    for (auto item : allVarsOf_a_and_b)
+        std::cout << "ID: " << item << "     | Label: " << manager.Table.at(item).Label << "\n\n" << std::endl;
 
     manager.findVars(function, allVarsOfF);
 
@@ -442,7 +529,9 @@ TEST_F(ManagerFixture, findVarsTest)
     EXPECT_EQ(allVarsOfF.count(var_d), 1);
     EXPECT_EQ(allVarsOfF.count(manager.True()), 0);
 
-
+    std::cout << "Var of fkt: " << std::endl;
+    for (auto item : allVarsOfF)
+        std::cout << "ID: " << item << "     | Label: " << manager.Table.at(item).Label << "\n\n" << std::endl;
     manager.printTable();
 }
 
@@ -460,147 +549,6 @@ TEST_F(ManagerFixture, UniqueTableSizeTest)
     table_size += 3;
 
     EXPECT_EQ(manager.uniqueTableSize(), table_size);
-}
-
-TEST(DrawNegGraphs, simpleCase)
-{
-    ClassProject::Manager manager = ClassProject::Manager();
-
-    auto var_A = manager.createVar("a");
-    auto var_B = manager.createVar("b");
-    auto var_C = manager.createVar("c");
-    auto var_D = manager.createVar("d");
-
-    auto all_AND = manager.and2(manager.and2(var_A, var_B), manager.and2(var_C, var_D));
-    auto all_NAND = manager.neg(manager.and2(manager.and2(var_A, var_B), manager.and2(var_C, var_D)));
-
-    EXPECT_EQ(manager.coFactorFalse(all_AND, var_A), manager.False());
-    EXPECT_EQ(manager.coFactorFalse(all_AND, var_C), manager.False());
-    EXPECT_EQ(manager.coFactorFalse(all_AND, var_B), manager.False());
-    EXPECT_EQ(manager.coFactorFalse(all_AND, var_D), manager.False());
-
-    EXPECT_EQ(manager.coFactorFalse(all_NAND, var_A), manager.True());
-    EXPECT_EQ(manager.coFactorFalse(all_NAND, var_C), manager.True());
-    EXPECT_EQ(manager.coFactorFalse(all_NAND, var_B), manager.True());
-    EXPECT_EQ(manager.coFactorFalse(all_NAND, var_D), manager.True());
-
-    manager.printTable();
-}
-
-TEST(DrawNegGraphs2, simpleCase)
-{
-    ClassProject::Manager manager = ClassProject::Manager();
-
-    auto var_A = manager.createVar("a");
-    auto var_B = manager.createVar("b");
-    auto var_C = manager.createVar("c");
-    auto var_D = manager.createVar("d");
-
-    auto all_OR = manager.or2(manager.or2(var_A, var_B), manager.or2(var_C, var_D));
-    auto all_NOR = manager.neg(manager.or2(manager.or2(var_A, var_B), manager.or2(var_C, var_D)));
-
-    EXPECT_EQ(manager.coFactorTrue(all_OR, var_A), manager.True());
-    EXPECT_EQ(manager.coFactorTrue(all_OR, var_C), manager.True());
-    EXPECT_EQ(manager.coFactorTrue(all_OR, var_B), manager.True());
-    EXPECT_EQ(manager.coFactorTrue(all_OR, var_D), manager.True());
-
-    EXPECT_EQ(manager.coFactorTrue(all_NOR, var_A), manager.False());
-    EXPECT_EQ(manager.coFactorTrue(all_NOR, var_C), manager.False());
-    EXPECT_EQ(manager.coFactorTrue(all_NOR, var_B), manager.False());
-    EXPECT_EQ(manager.coFactorTrue(all_NOR, var_D), manager.False());
-
-    manager.printTable();
-}
-
-TEST(ComplementedEdge, LowEdgeCase)
-{
-    ClassProject::Manager manager = ClassProject::Manager();
-
-    auto var_a = manager.createVar("a");
-    auto var_b = manager.createVar("b");
-
-    auto not_b = manager.neg(var_b);
-
-    auto f = manager.or2(var_a, not_b);
-
-    EXPECT_EQ(manager.coFactorTrue(f, var_a), manager.True());
-    EXPECT_EQ(manager.coFactorFalse(f, var_a), not_b);
-    EXPECT_EQ(manager.coFactorTrue(f, var_b), var_a);
-    EXPECT_EQ(manager.coFactorFalse(f, var_b), manager.True());
-
-    manager.printTable();
-}
-
-TEST(ComplementedEdge, HighEdgeCase)
-{
-    ClassProject::Manager manager = ClassProject::Manager();
-
-    auto var_a = manager.createVar("a");
-    auto var_b = manager.createVar("b");
-
-    auto not_b = manager.neg(var_b);
-
-    auto f = manager.and2(var_a, not_b);
-
-    EXPECT_EQ(manager.coFactorTrue(f, var_a), not_b);
-    EXPECT_EQ(manager.coFactorFalse(f, var_a), manager.False());
-    EXPECT_EQ(manager.coFactorTrue(f, var_b), manager.False());
-    EXPECT_EQ(manager.coFactorFalse(f, var_b), var_a);
-
-    manager.printTable();
-}
-
-TEST(SampleFunction, AB_NOT_AND_CD)
-{
-    ClassProject::Manager manager = ClassProject::Manager();
-
-    auto var_a = manager.createVar("a");
-    auto var_b = manager.createVar("b");
-    auto var_c = manager.createVar("c");
-    auto var_d = manager.createVar("d");
-
-    std::cout << "a_and_b\n";
-    auto a_and_b = manager.and2(var_a, var_b);
-    manager.printTruthTable(a_and_b);
-
-    std::cout << "\nc_and_d\n";
-    auto c_and_d = manager.and2(var_c, var_d);
-    manager.printTruthTable(c_and_d);
-
-    std::cout << "\nnot_a_and_b\n";
-    auto not_a_and_b = manager.neg(a_and_b);
-    manager.printTruthTable(not_a_and_b);
-
-    std::cout << "\nnot_a_and_b__and_c_and_d\n";
-    auto not_a_and_b__and_c_and_d = manager.and2(not_a_and_b, c_and_d);
-    manager.printTruthTable(not_a_and_b__and_c_and_d);
-
-    std::cout << "\nf\n";
-    auto f = manager.neg(not_a_and_b__and_c_and_d);
-
-    manager.printTable();
-    manager.printTruthTable(f);
-}
-
-TEST(SampleFunction, NOR)
-{
-    ClassProject::Manager manager = ClassProject::Manager();
-
-    auto var_a = manager.createVar("a");
-    auto var_b = manager.createVar("b");
-    auto var_c = manager.createVar("c");
-    auto var_d = manager.createVar("d");
-
-    auto a_or_b = manager.or2(var_a, var_b);
-    auto not_a_or_b = manager.neg(a_or_b);
-
-    auto c_or_d = manager.or2(var_c, var_d);
-    auto c_or_d_or_not_a_or_b = manager.or2(c_or_d, not_a_or_b);
-
-    auto f = manager.neg(c_or_d_or_not_a_or_b);
-
-    manager.printTable();
-    manager.printTruthTable(f);
 }
 
 #endif
