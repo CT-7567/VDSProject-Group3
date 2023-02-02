@@ -91,7 +91,7 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
     }
 
     BDD_ID newID = Table.size();
-    std::string new_label = "test";
+    std::string new_label = "";
     // if (rHigh == TRUE_ID) {
     //     new_label = "(" + Table.at(Table.at(x).TopVar).Label + "+" + Table.at(rLow).Label + ")";
     // } else if (rHigh == FALSE_ID and rLow == TRUE_ID) {
