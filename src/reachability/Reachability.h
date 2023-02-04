@@ -4,9 +4,6 @@
 #include "ManagerInterface.h"
 #include "ReachabilityInterface.h"
 
-#include <iostream>
-#include <string>
-
 namespace ClassProject {
 
 class Reachability : public ReachabilityInterface
@@ -26,6 +23,7 @@ private:
     BDD_ID calculateImage(BDD_ID cR, BDD_ID transitionRelation);
 
     std::vector<BDD_ID> stateVars;
+    std::vector<BDD_ID> nextStateVars;
     std::vector<BDD_ID> transitionFunctions;
     BDD_ID initialState;
 };
