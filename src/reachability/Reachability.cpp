@@ -80,7 +80,7 @@ void ClassProject::Reachability::setInitState(const std::vector<bool> &stateVect
     BDD_ID characteristicFunction = True();
 
     for (std::size_t i = 0; i < stateVector.size(); i++) {
-        BDD_ID clause = xnor2(stateVars[i], stateVector[i]);
+        BDD_ID clause = xnor2(stateVars[i], stateVector[i] ? True() : False());
         characteristicFunction = and2(clause, characteristicFunction);
     }
 
@@ -103,8 +103,8 @@ ClassProject::BDD_ID ClassProject::Reachability::calculateImage(BDD_ID cR, BDD_I
 {
     BDD_ID temp = and2(cR, transitionRelation);
 
-    for (std::size_t i = 0; i < stateVars.size(); i++) {
-        temp = or2(coFactorTrue(temp, stateVars[i]), coFactorFalse(temp, stateVars[i]));
+    for (auto stateVar : stateVars) {
+        temp = or2(coFactorTrue(temp, stateVar), coFactorFalse(temp, stateVar));
     }
 
     BDD_ID rename = True();
@@ -116,8 +116,8 @@ ClassProject::BDD_ID ClassProject::Reachability::calculateImage(BDD_ID cR, BDD_I
 
     temp = and2(temp, rename);
 
-    for (std::size_t i = 0; i < nextStateVars.size(); i++) {
-        temp = or2(coFactorTrue(temp, nextStateVars[i]), coFactorFalse(temp, nextStateVars[i]));
+    for (auto nextStateVar : nextStateVars) {
+        temp = or2(coFactorTrue(temp, nextStateVar), coFactorFalse(temp, nextStateVar));
     }
 
     return temp;

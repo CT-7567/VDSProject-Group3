@@ -1,18 +1,24 @@
 #include "Manager.h"
 
-#include <iomanip>
-#include <iostream>
 #include <algorithm>
 #include <functional>
+#include <iomanip>
+#include <iostream>
 
 namespace ClassProject {
+
+Manager::Manager()
+{
+    Table.emplace_back(Node{0, 0, 0, "False"});
+    Table.emplace_back(Node{1, 1, 1, "True"});
+}
 
 BDD_ID Manager::createVar(const std::string &label)
 {
     BDD_ID newID = Table.size();
     Table.emplace_back(Node{1, 0, newID, label});
 
-    SubGraphTable.emplace(SubGraphTableEntry{newID, 0, 1}, newID);
+    SubGraphTable.emplace(BDDTriple{newID, 0, 1}, newID);
 
     return newID;
 }
@@ -47,19 +53,21 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
     if (isConstant(i)) {
         if (i == 1) {
             return t;
-        } else
-            return e;
+        }
+
+        return e;
     }
 
-    if (t == 1 && e == 0)
+    if (t == 1 && e == 0) {
         return i;
-    
-    if (t == e)
+    }
+
+    if (t == e) {
         return t;
+    }
 
     auto computedIt = ComputedTable.find({i, t, e});
-    if (computedIt != ComputedTable.end())
-    {
+    if (computedIt != ComputedTable.end()) {
         return computedIt->second;
     }
 
@@ -73,8 +81,9 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
         x = std::min(TopB, TopA);
     } else if (isConstant(TopB) and !isConstant(TopC)) {
         x = std::min(TopA, TopC);
-    } else
+    } else {
         x = TopA;
+    }
 
     rHigh = ite(coFactorTrue(i, x), coFactorTrue(t, x), coFactorTrue(e, x));
     rLow = ite(coFactorFalse(i, x), coFactorFalse(t, x), coFactorFalse(e, x));
@@ -84,29 +93,32 @@ BDD_ID Manager::ite(BDD_ID i, BDD_ID t, BDD_ID e)
     }
 
     auto subGraphIt = SubGraphTable.find({x, rLow, rHigh});
-    if (subGraphIt != SubGraphTable.end())
-    {
-        ComputedTable.emplace(ComputedTableEntry{i, t, e}, subGraphIt->second);
+    if (subGraphIt != SubGraphTable.end()) {
+        ComputedTable.emplace(BDDTriple{i, t, e}, subGraphIt->second);
         return subGraphIt->second;
     }
 
     BDD_ID newID = Table.size();
-    std::string new_label = "";
-    // if (rHigh == TRUE_ID) {
-    //     new_label = "(" + Table.at(Table.at(x).TopVar).Label + "+" + Table.at(rLow).Label + ")";
-    // } else if (rHigh == FALSE_ID and rLow == TRUE_ID) {
-    //     new_label = "~" + Table.at(Table.at(x).TopVar).Label;
-    // } else if (rLow == TRUE_ID) {
-    //     new_label = "(~" + Table.at(Table.at(x).TopVar).Label + +"+" + Table.at(rHigh).Label + ")";
-    // } else if (rHigh == FALSE_ID) {
-    //     new_label = "(~" + Table.at(Table.at(x).TopVar).Label + "*" + Table.at(rLow).Label + ")";
-    // } else if (rLow == FALSE_ID) {
-    //     new_label = "(" + Table.at(Table.at(x).TopVar).Label + "*" + Table.at(rHigh).Label + ")";
-    // }
-    Table.emplace_back(Node{rHigh, rLow, x, new_label});
 
-    ComputedTable.emplace(ComputedTableEntry{i, t, e}, newID);
-    SubGraphTable.emplace(SubGraphTableEntry{x, rLow, rHigh}, newID);
+    std::string label;
+#ifdef ENABLE_LABELS
+    if (rHigh == TRUE_ID) {
+        label = "(" + Table.at(Table.at(x).TopVar).Label + "+" + Table.at(rLow).Label + ")";
+    } else if (rHigh == FALSE_ID and rLow == TRUE_ID) {
+        label = "~" + Table.at(Table.at(x).TopVar).Label;
+    } else if (rLow == TRUE_ID) {
+        label = "(~" + Table.at(Table.at(x).TopVar).Label + +"+" + Table.at(rHigh).Label + ")";
+    } else if (rHigh == FALSE_ID) {
+        label = "(~" + Table.at(Table.at(x).TopVar).Label + "*" + Table.at(rLow).Label + ")";
+    } else if (rLow == FALSE_ID) {
+        label = "(" + Table.at(Table.at(x).TopVar).Label + "*" + Table.at(rHigh).Label + ")";
+    }
+#endif
+
+    Table.emplace_back(Node{rHigh, rLow, x, label});
+
+    ComputedTable.emplace(BDDTriple{i, t, e}, newID);
+    SubGraphTable.emplace(BDDTriple{x, rLow, rHigh}, newID);
 
     return newID;
 }
@@ -158,65 +170,63 @@ BDD_ID Manager::coFactorFalse(BDD_ID f)
 BDD_ID Manager::neg(BDD_ID a)
 {
     BDD_ID temp = ite(a, 0, 1);
-    // Table.at(temp).Label = "~" + Table.at(a).Label;
+#ifdef ENABLE_LABELS
+    Table.at(temp).Label = "~" + Table.at(a).Label;
+#endif
     return temp;
 }
 
 BDD_ID Manager::and2(BDD_ID a, BDD_ID b)
 {
-
     auto a_and_b = ite(a, b, FALSE_ID);
-
-    // Table.at(a_and_b).Label = "(" + Table.at(a).Label + "*" + Table.at(b).Label + ")";
-
+#ifdef ENABLE_LABELS
+    Table.at(a_and_b).Label = "(" + Table.at(a).Label + "*" + Table.at(b).Label + ")";
+#endif
     return a_and_b;
 }
 
 BDD_ID Manager::or2(BDD_ID a, BDD_ID b)
 {
-
     auto a_or_b = ite(a, TRUE_ID, b);
-
-    // Table.at(a_or_b).Label = "(" + Table.at(a).Label + "+" + Table.at(b).Label + ")";
-
+#ifdef ENABLE_LABELS
+    Table.at(a_or_b).Label = "(" + Table.at(a).Label + "+" + Table.at(b).Label + ")";
+#endif
     return a_or_b;
 }
 
 BDD_ID Manager::xor2(BDD_ID a, BDD_ID b)
 {
-
     auto a_xor_b = ite(a, neg(b), b);
-
-    // Table.at(a_xor_b).Label = "(" + Table.at(a).Label + "⊕" + Table.at(b).Label + ")";
-
+#ifdef ENABLE_LABELS
+    Table.at(a_xor_b).Label = "(" + Table.at(a).Label + "⊕" + Table.at(b).Label + ")";
+#endif
     return a_xor_b;
 }
 
 BDD_ID Manager::nand2(BDD_ID a, BDD_ID b)
 {
     auto a_nand_b = ite(a, neg(b), TRUE_ID);
-
-    // Table.at(a_nand_b).Label = "~(" + Table.at(a).Label + "*" + Table.at(b).Label + ")";
-
+#ifdef ENABLE_LABELS
+    Table.at(a_nand_b).Label = "~(" + Table.at(a).Label + "*" + Table.at(b).Label + ")";
+#endif
     return a_nand_b;
 }
 
 BDD_ID Manager::nor2(BDD_ID a, BDD_ID b)
 {
     auto a_nor_b = ite(a, FALSE_ID, neg(b));
-
-    // Table.at(a_nor_b).Label = "~(" + Table.at(a).Label + "+" + Table.at(b).Label + ")";
-
+#ifdef ENABLE_LABELS
+    Table.at(a_nor_b).Label = "~(" + Table.at(a).Label + "+" + Table.at(b).Label + ")";
+#endif
     return a_nor_b;
 }
 
 BDD_ID Manager::xnor2(BDD_ID a, BDD_ID b)
 {
-
     auto a_xnor_b = ite(a, b, neg(b));
-
-    // Table.at(a_xnor_b).Label = "~(" + Table.at(a).Label + "⊕" + Table.at(b).Label + ")";
-
+#ifdef ENABLE_LABELS
+    Table.at(a_xnor_b).Label = "~(" + Table.at(a).Label + "⊕" + Table.at(b).Label + ")";
+#endif
     return a_xnor_b;
 }
 
@@ -227,32 +237,20 @@ std::string Manager::getTopVarName(const BDD_ID &root)
 
 void Manager::findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root)
 {
-
     if (!isConstant(root)) {
-
         nodes_of_root.insert(root);
-
-        // nodes_of_root.insert( Tabel.at(root).TopVar );
-
         findNodes(Table.at(root).High, nodes_of_root);
-
         findNodes(Table.at(root).Low, nodes_of_root);
-
     } else {
-
         nodes_of_root.insert(root);
     }
 }
 
 void Manager::findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root)
 {
-
     if (!isConstant(root)) {
-
         vars_of_root.insert(topVar(root));
-
         findVars(Table.at(root).High, vars_of_root);
-
         findVars(Table.at(root).Low, vars_of_root);
     }
 }
@@ -279,8 +277,7 @@ void Manager::printTruthTable(BDD_ID f)
     std::set<BDD_ID> vars;
     findVars(f, vars);
 
-    for (auto var : vars)
-    {
+    for (auto var : vars) {
         auto const &node = Table.at(var);
         std::cout << std::setw(5) << node.Label;
     }
@@ -293,11 +290,11 @@ void Manager::printTruthTable(BDD_ID f)
     printSubTable = [this, level, &printSubTable](BDD_ID f, std::vector<int> subTable) {
         if (subTable.size() == level) {
             subTable.push_back(f);
-            
-            for(auto i : subTable) {
+
+            for (auto i : subTable) {
                 std::cout << std::setw(5) << i;
             }
-            
+
             std::cout << std::endl;
             return;
         }
