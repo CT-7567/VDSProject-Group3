@@ -53,6 +53,13 @@ TEST_F(ReachabilityTest, HowTo_Example) { /* NOLINT */
     ASSERT_TRUE(fsm2->isReachable({true, true}));
 }
 
+TEST_F(ReachabilityTest, DefaultTransitions) { /* NOLINT */
+    ASSERT_TRUE(fsm2->isReachable({false, false}));
+    ASSERT_FALSE(fsm2->isReachable({false, true}));
+    ASSERT_FALSE(fsm2->isReachable({true, false}));
+    ASSERT_FALSE(fsm2->isReachable({true, true}));
+}
+
 TEST_F(ReachabilityTest, SetInitialStateThrow) { /* NOLINT */
     // Bits does not match
     EXPECT_THROW(fsm2->setInitState({}), std::runtime_error);

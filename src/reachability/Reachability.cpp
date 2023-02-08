@@ -21,6 +21,22 @@ ClassProject::Reachability::Reachability(unsigned int stateSize) : ReachabilityI
         BDD_ID var = createVar(label);
         nextStateVars.push_back(var);
     }
+
+    // Default initial state
+    {
+        BDD_ID characteristicFunction = True();
+        for (auto stateVar : stateVars) {
+            BDD_ID clause = xnor2(stateVar, False());
+            characteristicFunction = and2(clause, characteristicFunction);
+        }
+
+        initialState = characteristicFunction;
+    }
+
+    // Default transition function
+    for (auto stateVar : stateVars) {
+        transitionFunctions.push_back(stateVar);
+    }
 }
 
 const std::vector<ClassProject::BDD_ID> &ClassProject::Reachability::getStates() const
